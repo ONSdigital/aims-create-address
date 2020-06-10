@@ -1,6 +1,6 @@
 # aims-create-address
 
-An API for loading addresses into an Elasticsearch index. Addresses can be loaded by either a PubSub message or a CSV file. The API is written in Java and uses the Spring Boot Reactive stack.
+An API for loading addresses into an Elasticsearch index. Addresses can be loaded by either a GCP PubSub message or a CSV file. The API is written in Java and uses the Spring Boot Reactive stack.
 
 ### Running the Create API Locally
 
