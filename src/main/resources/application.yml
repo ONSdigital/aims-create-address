@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: create-address
+  elasticsearch:
+    rest:
+      uris: localhost:9200
+  data:
+    elasticsearch:
+      client:
+        reactive:
+          endpoints: localhost:9200
+  cloud:
+    gcp:
+      project-id: YOUR_GCP_PROJECT_ID_HERE
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+#logging:
+#  level:
+#    uk:
+#      gov:
+#        ons: DEBUG
+#    org:
+#      springframework:
+#        data:
+#          elasticsearch: DEBUG
+aims:
+  elasticsearch:
+    index:
+      name: new-addresses
+  tokeniser:
+    uri: http://localhost:8081
+    path: /tokens?address={address}
