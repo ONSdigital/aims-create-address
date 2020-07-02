@@ -4,10 +4,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.elasticsearch.annotations.Document;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Document(indexName = "new-addresses")
 @TypeAlias("address")
+@AllArgsConstructor
 public @Data class Address {
 
 	@Id
@@ -23,20 +25,5 @@ public @Data class Address {
 
 	public enum CountryCode {
 		E, W, N, S
-	}
-
-	public Address(long uprn, String postcodeIn, String postcodeOut, String classificationCode,
-			String censusAddressType, String censusEstabType, CountryCode countryCode, String postcode,
-			Tokens tokens) {
-		super();
-		this.uprn = uprn;
-		this.postcodeIn = postcodeIn;
-		this.postcodeOut = postcodeOut;
-		this.classificationCode = classificationCode;
-		this.censusAddressType = censusAddressType;
-		this.censusEstabType = censusEstabType;
-		this.countryCode = countryCode;
-		this.postcode = postcode;
-		this.tokens = tokens;
 	}
 }
