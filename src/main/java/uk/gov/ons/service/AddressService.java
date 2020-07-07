@@ -27,6 +27,7 @@ import reactor.core.scheduler.Schedulers;
 import uk.gov.ons.entities.Address;
 import uk.gov.ons.entities.CSVAddress;
 import uk.gov.ons.entities.InputAddress;
+import uk.gov.ons.exception.CreateAddressRuntimeException;
 import uk.gov.ons.json.TokeniserResponse;
 import uk.gov.ons.repository.AddressRepository;
 import uk.gov.ons.util.AddressMapper;
@@ -37,7 +38,7 @@ public class AddressService {
 	private Logger logger = LoggerFactory.getLogger(AddressService.class);
 	
 	@Autowired
-	AddressRepository addressRepository;
+	private AddressRepository addressRepository;
 	
 	private final WebClient webClient;
 	
@@ -71,14 +72,17 @@ public class AddressService {
 
 					if (!createIndexResponse.isAcknowledged()) {
 						logger.error(String.format("Can not create index %s", indexName));
+						throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName));
 					}
 
 				} catch (IOException ioe) {
 					logger.error(String.format("Can not create index %s", indexName), ioe);
+					throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName), ioe);
 				}
 			}
-		} catch (IOException e) {
-			logger.error(String.format("Can not create index %s", indexName), e);
+		} catch (IOException ioe) {
+			logger.error(String.format("Can not create index %s", indexName), ioe);
+			throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName), ioe);
 		}
 	}
 

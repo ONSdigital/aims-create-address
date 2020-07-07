@@ -8,7 +8,9 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.geo.Point;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public @Data class Tokens {
 	private String organisationName;
 	private String departmentName;
@@ -39,10 +41,6 @@ public @Data class Tokens {
 	private String addressLine3;
 	@Transient
 	private String postcode;
-	
-	public Tokens() {
-		super();
-	}
 
 	public Tokens(TokensBuilder builder) {
 		this.organisationName = builder.organisationName;
