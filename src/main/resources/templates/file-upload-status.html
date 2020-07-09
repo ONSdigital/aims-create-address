@@ -27,9 +27,8 @@
 					<thead>
 						<tr>
 							<th scope="col">#</th>
-							<th scope="col">ARID</th>
-							<th scope="col">ESTAB_ARID</th>
 							<th scope="col">UPRN</th>
+							<th scope="col">ESTAB_UPRN</th>
 							<th scope="col">ADDRESS_TYPE</th>
 							<th scope="col">ESTAB_TYPE</th>
 							<th scope="col">ADDRESS_LEVEL</th>
@@ -48,18 +47,20 @@
 							<th scope="col">LAD</th>
 							<th scope="col">REGION</th>
 							<th scope="col">HTC_WILLINGNESS</th>
+							<th scope="col">HTC_DIGITAL</th>
 							<th scope="col">TREATMENT_CODE</th>
 							<th scope="col">FIELDCOORDINATOR_ID</th>
 							<th scope="col">FIELDOFFICER_ID</th>
 							<th scope="col">CE_EXPECTED_CAPACITY</th>
+							<th scope="col">CE_SECURE</th>
+							<th scope="col">PRINT_BATCH</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr th:each="address, i : ${addresses}">
 							<th scope="row" th:text="${i.index + 1}"></th>
-							<td th:text="${address.arid}"></td>
-							<td th:text="${address.estabArid}"></td>
 							<td th:text="${address.uprn}"></td>
+							<td th:text="${address.estabUprn}"></td>
 							<td th:text="${address.addressType}"></td>
 							<td th:text="${address.estabType}"></td>
 							<td th:text="${address.addressLevel}"></td>
@@ -83,6 +84,8 @@
 							<td th:text="${address.fieldCoordinatorId}"></td>
 							<td th:text="${address.fieldOfficerId}"></td>
 							<td th:text="${address.ceExpectedCapacity}"></td>
+							<td th:text="${address.ceSecure}"></td>
+							<td th:text="${address.printBatch}"></td>
 						</tr>
 					</tbody>
 				</table>

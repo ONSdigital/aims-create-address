@@ -139,7 +139,7 @@ class AddressServiceTest {
 	private long uprn3 = 100061542999L;	
 	private long uprn4 = 999L;
 	private long uprn5 = 9998L;
-	private long uprn6 = 888L;
+	private long uprn6 = 1234567891013L;
 	private String classificationCode = "RD03";
 	private String classificationCode2 = "RD06";
 	private String classificationCode3 = "RD07";
@@ -361,7 +361,7 @@ class AddressServiceTest {
 		mockTokeniserResponse.setPostcodeOut("GU16");
 		
 		CSVAddress csvAddress2 = new CSVAddress();
-		csvAddress2.setUprn("888");
+		csvAddress2.setUprn("1234567891013");
 		csvAddress2.setRegion("W99999999");
 		csvAddress2.setAddressLine1("Berth 42");
 		csvAddress2.setAddressLine2("Poplar Dock Marina");
@@ -433,7 +433,7 @@ class AddressServiceTest {
 			.verifyComplete();
 		
 		// Check ES 
-		List<String> ids = Arrays.asList("999", "888");
+		List<String> ids = Arrays.asList("999", "1234567891013");
 		
 		StepVerifier.create(repository.findAllById(ids))
 			.recordWith(HashSet::new)
