@@ -8,10 +8,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper=true)
 public @Data class CSVAddress extends InputAddress {
 	
-	@CsvBindByName
-	private String arid;
-	@CsvBindByName(column = "estab_arid")
-	private String estabArid;
+	@CsvBindByName(column = "estab_uprn")
+	private String estabUprn;
 	@CsvBindByName(column = "abp_code")
 	private String abpCode;
 	@CsvBindByName(column = "organisation_name")
@@ -36,4 +34,8 @@ public @Data class CSVAddress extends InputAddress {
 	private String fieldOfficerId;
 	@CsvBindByName(column = "ce_expected_capacity")
 	private String ceExpectedCapacity;
+	@CsvBindByName(column = "ce_secure")
+	private String ceSecure;
+	@CsvBindByName(column = "print_batch")
+	private String printBatch;
 }

@@ -83,9 +83,9 @@ public class CreateAddressControllerTest {
 			.expectStatus().isOk()
 			.expectBody(String.class)
 			.consumeWith(response -> {
-				// Does the response contain the 2 ARID values uploaded?
-				assertTrue(response.toString().contains("DDR200314000000009201"));
-				assertTrue(response.toString().contains("DDR200314000000009202"));
+				// Does the response contain the 2 UPRN values uploaded?
+				assertTrue(response.toString().contains("1234567891011"));
+				assertTrue(response.toString().contains("1234567891012"));			
 			});
 	}	
 }
