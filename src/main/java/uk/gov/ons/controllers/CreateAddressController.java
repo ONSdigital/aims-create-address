@@ -58,7 +58,7 @@ public class CreateAddressController {
 
 		        // Add the addresses to Elasticsearch
 		        addressService.createAddressesFromCsv(addresses).doOnNext(output -> {
-		        	logger.info(String.format("Added: %s", output.toString()));
+		        	logger.debug(String.format("Added: %s", output.toString()));
 		        	
 		        	/* 
 		        	 * This is very basic at the moment and just returns to the view the addresses 
