@@ -16,17 +16,25 @@ management:
   endpoints:
     web:
       exposure:
-        include: '*'
-#logging:
-#  level:
-#    uk:
-#      gov:
-#        ons: DEBUG
-#    org:
-#      springframework:
-#        data:
-#          elasticsearch: DEBUG
+        include: health,info
+    enabled-by-default: false
+  endpoint:
+    info:
+      enabled: true
+    health:
+      enabled: true
+logging:
+  level:
+    uk:
+      gov:
+        ons: DEBUG
+    org:
+      springframework:
+        data:
+          elasticsearch: TRACE
 aims:
+  pubsub:
+    subscription: new-address-subscription
   elasticsearch:
     index:
       name: new-addresses

@@ -106,11 +106,12 @@ public class AddressService {
 	
 		return buildAddress(pubSubAddress)
 				.flatMap(address -> addressRepository.save(address))
-				.doOnError(ex -> Mono.just("Error: " + ex.getMessage()));
+				.doOnError(ex -> Mono.just("Error: " + ex.getMessage()))
+				.doOnSuccess(address -> logger.debug(String.format("Added address: %s", address)));
 	}	
 	
 	private Mono<Address> buildAddress(InputAddress inputAddress) {
-				
+		
 		return webClient.get()
 				.uri(path, inputAddress.getAddressAll())
 				.retrieve()
