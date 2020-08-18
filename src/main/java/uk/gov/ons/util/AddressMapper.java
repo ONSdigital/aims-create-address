@@ -1,7 +1,6 @@
 package uk.gov.ons.util;
 
 import uk.gov.ons.entities.Address;
-import uk.gov.ons.entities.CSVAddress;
 import uk.gov.ons.entities.InputAddress;
 import uk.gov.ons.entities.Tokens;
 import uk.gov.ons.json.TokeniserResponse;
@@ -57,12 +56,13 @@ public final class AddressMapper {
 		}
 		
 		Address address = new Address(
-				!inputAddress.getUprn().isEmpty() ? Long.parseLong(inputAddress.getUprn()): null, 
+				inputAddress.getUprn() != null && !inputAddress.getUprn().isEmpty() ? Long.parseLong(inputAddress.getUprn()): null, 
 				tokeniserResponse.getPostcodeIn(),
 				tokeniserResponse.getPostcodeOut(),
-				inputAddress instanceof CSVAddress ? ((CSVAddress) inputAddress).getAbpCode(): "", // No ABP Code in msg
+				inputAddress.getAbpCode(),
 				inputAddress.getAddressType(),
 				inputAddress.getEstabType(),
+				inputAddress.getEstabUprn() != null && !inputAddress.getEstabUprn().isEmpty() ? Long.parseLong(inputAddress.getEstabUprn()): null,
 				countryCode, 
 				tokeniserResponse.getPostcode(),
 				tokens);

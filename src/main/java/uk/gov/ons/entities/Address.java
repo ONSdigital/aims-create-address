@@ -13,12 +13,13 @@ import lombok.Data;
 public @Data class Address {
 
 	@Id
-	private long uprn;
+	private Long uprn;
 	private String postcodeIn;
 	private String postcodeOut;
 	private String classificationCode;
 	private String censusAddressType;
 	private String censusEstabType;
+	private Long censusEstabUprn;
 	private CountryCode countryCode;
 	private String postcode;
 	private Tokens tokens;

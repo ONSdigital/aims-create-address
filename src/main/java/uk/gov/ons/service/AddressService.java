@@ -112,11 +112,14 @@ public class AddressService {
 	
 	private Mono<Address> buildAddress(InputAddress inputAddress) {
 		
+		logger.debug(String.format("Input Address: %s", inputAddress.toString()));
+		
 		return webClient.get()
 				.uri(path, inputAddress.getAddressAll())
 				.retrieve()
 				.bodyToMono(TokeniserResponse.class)
 				.map(tokeniserResponse -> {
+					logger.debug(String.format("Tokeniser Response: %s", tokeniserResponse.toString()));
 	                Address address = AddressMapper.from(inputAddress, tokeniserResponse);
 	                return address;});
 	}

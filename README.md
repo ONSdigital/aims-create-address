@@ -14,47 +14,45 @@ An API for loading addresses into an Elasticsearch index. Addresses can be loade
 6. Run the Spring Boot app and send a test message. The PubSub message should use the following format:
 
   ```json
-  {
-     "event":{
-        "type":"NEW_ADDRESS_CONFIRMED",
-        "source":"ADDRESS_RESOLUTION",
-        "channel":"AR",
-        "dateTime":"2011-08-12T20:17:46.384Z",
-        "transactionId":"c45de4dc-3c3b-11e9-b210-d663bd873d93"
-     },
-     "payload":{
-        "newAddress":{
-          "collectionCase" : {
-              "id":"bbd55984-0dbf-4499-bfa7-0aa4228700e9",
-              "caseType":"SPG",
-              "survey":"CENSUS",
-              "fieldCoordinatorId":"SO_23",
-              "fieldOfficerId":"SO_23_123",
-              "address":{
-                  "addressLine1":"100",
-                  "addressLine2":"Kanes caravan park",
-                  "addressLine3":"fairoak road",
-                  "townName":"southampton",
-                  "postcode":"SO190PG",
-                  "region":"E",
-                  "addressType":"SPG",
-                  "addressLevel":"U",
-                  "estabType":"Residential Caravaner",
-                  "latitude":"50.917428",
-                  "longitude":"-1.238193",
-                  "uprn":"123456789"
-              },
-              "oa":"",
-              "lsoa":"",
-              "msoa":"",
-              "lad":"",
-              "htcWillingness":"1",
-              "htcDigital":"1",
-              "treatmentCode":"SPG_QPHSE"
+    {
+      "event": {
+        "type": "NEW_ADDRESS_ENHANCED",
+        "source": "CASE_PROCESSOR",
+        "channel": "RM",
+        "dateTime": "2020-08-05T12:11:54.008964Z",
+        "transactionId": "d9126d67-2830-4aac-8e52-47fb8f84d3b9"
+      },
+      "payload": {
+        "newAddress": {
+          "sourceCaseId": null,
+          "collectionCase": {
+            "id": "1d63aacf-a89e-4d9f-96e4-9b31fdb6f5ec",
+            "caseType": "SPG",
+            "survey": "CENSUS",
+            "address": {
+              "addressLine1": "123",
+              "addressLine2": "Fake caravan park",
+              "addressLine3": "The long road",
+              "townName": "Trumpton",
+              "postcode": "SO190PG",
+              "region": "E00001234",
+              "latitude": "50.917428",
+              "longitude": "-1.238193",
+              "uprn": "9998397697247",
+              "estabUprn": null,
+              "abpCode": null,
+              "addressType": "SPG",
+              "addressLevel": "U",
+              "estabType": null,
+              "organisationName": null
+            },
+            "handDelivery": false,
+            "skeleton": false,
+            "surveyLaunched": false
           }
         }
-     }
-  }
+      }
+    }
   ```
 7. To run a test of the CSV loader open the home page: <http://localhost:8080>. The CSV should use the following format:
 
