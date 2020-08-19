@@ -52,7 +52,7 @@ public class AddressService {
 			WebClient.Builder webClientBuilder) {
 
 		this.webClient = webClientBuilder.baseUrl(tokeniserEndpoint).build();
-		GetIndexRequest request = new GetIndexRequest("new-addresses");
+		GetIndexRequest request = new GetIndexRequest(indexName);
 
 		try {
 			if (!client.indices().exists(request, RequestOptions.DEFAULT)) {
