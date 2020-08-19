@@ -7,7 +7,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-@Document(indexName = "#{@indexName}")
+@Document(indexName = "#{@config.indexName}")
 @TypeAlias("address")
 @AllArgsConstructor
 public @Data class Address {
