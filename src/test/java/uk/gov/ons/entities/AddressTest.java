@@ -28,10 +28,11 @@ class AddressTest {
 	private String latitude = "55.55";
 	private String longitude = "-1.23";
 	private Point location = new Point(55.55, -1.23);
-	private long uprn = Long.parseLong("99");	 
+	private Long uprn = 99L;
 	private String classificationCode = "RD03";
 	private String censusAddressType = "HH";
 	private String censusEstabType = "Household";
+	private Long censusEstabUprn = 808L;
 	private Address.CountryCode countryCode = CountryCode.E;
 	
 	private Tokens tokens = new Tokens.TokensBuilder()
@@ -52,7 +53,7 @@ class AddressTest {
 			.addressLine3(addressLine3)
 			.postcode(postcode).build();	
 	
-	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType, censusEstabType, countryCode, postcode, tokens);
+	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode, tokens);
 		
 	@Test
 	void testAddressCreation() {

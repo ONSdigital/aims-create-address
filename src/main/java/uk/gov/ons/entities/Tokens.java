@@ -30,7 +30,7 @@ public @Data class Tokens {
 	private String townName;
 	private Point location;
 	private String addressLevel;
-	private long uprn;
+	private Long uprn;
 	private String addressAll;
 	@Transient
 	private String latitude;
@@ -68,8 +68,16 @@ public @Data class Tokens {
 		this.addressLine3 = builder.addressLine3;
 		this.postcode = builder.postcode;
 		this.location = new Point(parseStringToOptionalDouble(builder.latitude).orElse(0.0), parseStringToOptionalDouble(builder.longitude).orElse(0.0));	
-		this.addressAll = Stream.of(builder.addressLine1, builder.addressLine2, builder.addressLine3, builder.townName, builder.postcode)
-				.filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(" "));
+		this.addressAll = Stream.of(
+				builder.organisationName,
+				builder.departmentName, 
+				builder.subBuildingName, 
+				builder.buildingName,
+				buildingNumber != null ? builder.buildingNumber.toString() : "",
+				builder.streetName,
+				builder.locality, 
+				builder.townName, 
+				builder.postcode).filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(" "));
 	}
 
 	private static Optional<Double> parseStringToOptionalDouble(String value) {
@@ -104,7 +112,7 @@ public @Data class Tokens {
 		private String locality;
 		private String townName;
 		private String addressLevel;
-		private long uprn;
+		private Long uprn;
 		private String latitude;
 		private String longitude;
 		private String addressLine1;
@@ -197,7 +205,7 @@ public @Data class Tokens {
 			return this;
 		}
 
-		public TokensBuilder uprn(long uprn) {
+		public TokensBuilder uprn(Long uprn) {
 			this.uprn = uprn;
 			return this;
 		}

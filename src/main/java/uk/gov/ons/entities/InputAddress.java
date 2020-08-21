@@ -33,6 +33,12 @@ public @Data class InputAddress {
 	private String longitude;
 	@CsvBindByName
 	private String uprn;
+	@CsvBindByName(column = "abp_code")
+	private String abpCode;
+	@CsvBindByName(column = "organisation_name")
+	private String organisationName;
+	@CsvBindByName(column = "estab_uprn")
+	private String estabUprn;
 
 	public String getAddressAll() {
 	

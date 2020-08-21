@@ -29,6 +29,10 @@
 			"index": "true",
 			"analyzer": "keyword"
 		},
+		"censusEstabUprn": {
+			"type": "long",
+			"index": "true"
+		},
 		"countryCode": {
 			"type": "text",
 			"index": "true",

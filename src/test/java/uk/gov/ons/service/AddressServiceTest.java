@@ -64,8 +64,8 @@ class AddressServiceTest {
 	private static MockWebServer mockBackEnd;
 
 	private String organisationName = "ACME FLOWERS LTD";
-	private short buildingNumber = 78;
-	private short buildingNumber5 = 89;
+	private Short buildingNumber = 78;
+	private Short buildingNumber5 = 89;
 	private String buildingName = "CHESTERFIELD LODGE";
 	private String buildingName2 = "205B NASH HOUSE";
 	private String buildingName3 = "17 WILLOW PONTOON NORTHAMPTON MARINA";
@@ -75,17 +75,17 @@ class AddressServiceTest {
 	private String subBuildingName = "FLAT C";
 	private String subBuildingName4 = "APARTMENT 10-64";
 	private String subBuildingName5 = "BERTH 3";
-	private short paoStartNumber = 78;
-	private short paoStartNumber4 = 1;
-	private short paoStartNumber5 = 89;
-	private short paoStartNumber6 = 42;
+	private Short paoStartNumber = 78;
+	private Short paoStartNumber4 = 1;
+	private Short paoStartNumber5 = 89;
+	private Short paoStartNumber6 = 42;
 	private String saoStartSuffix = "C";
-	private short saoStartNumber4 = 10;
-	private short saoStartNumber5 = 3;
-	private short saoEndNumber4 = 64;
-	private short paoStartNumber2 = 205;
+	private Short saoStartNumber4 = 10;
+	private Short saoStartNumber5 = 3;
+	private Short saoEndNumber4 = 64;
+	private Short paoStartNumber2 = 205;
 	private String saoStartSuffix2 = "B";
-	private short paoStartNumber3 = 17;
+	private Short paoStartNumber3 = 17;
 	private String addressLine1 = "ACME FLOWERS LTD";
 	private String addressLine2 = "FLAT C CHESTERFIELD LODGE";
 	private String addressLine3 = "78 BEULAH HILL";
@@ -134,12 +134,12 @@ class AddressServiceTest {
 	private String longitude2 = "-0.2503676";
 	private String latitude3 = "52.232804";
 	private String longitude3 = "-0.8894609";
-	private long uprn = 99L;	 
-	private long uprn2 = 100061542998L;	 
-	private long uprn3 = 100061542999L;	
-	private long uprn4 = 999L;
-	private long uprn5 = 9998L;
-	private long uprn6 = 1234567891013L;
+	private Long uprn = 99L;	 
+	private Long uprn2 = 100061542998L;	 
+	private Long uprn3 = 100061542999L;	
+	private Long uprn4 = 999L;
+	private Long uprn5 = 9998L;
+	private Long uprn6 = 1234567891013L;
 	private String classificationCode = "RD03";
 	private String classificationCode2 = "RD06";
 	private String classificationCode3 = "RD07";
@@ -147,6 +147,7 @@ class AddressServiceTest {
 	private String censusEstabType = "Household";
 	private Address.CountryCode countryCode = CountryCode.E;
 	private Address.CountryCode countryCode2 = CountryCode.W;
+	private Long censusEstabUprn = 808L;
 		
 	private Tokens tokens = new Tokens.TokensBuilder()
 			.organisationName(organisationName)
@@ -167,7 +168,7 @@ class AddressServiceTest {
 			.addressLine3(addressLine3)
 			.postcode(postcode).build();
 	
-	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType, censusEstabType, countryCode, postcode, tokens);
+	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode, tokens);
 	
 	private Tokens tokens2 = new Tokens.TokensBuilder()
 			.buildingName(buildingName2)
@@ -185,7 +186,7 @@ class AddressServiceTest {
 			.addressLine3(addressLine23)
 			.postcode(postcode2).build();
 	
-	private Address address2 = new Address(uprn2, postcodeIn2, postcodeOut2, classificationCode2, censusAddressType, censusEstabType, countryCode, postcode2, tokens2);
+	private Address address2 = new Address(uprn2, postcodeIn2, postcodeOut2, classificationCode2, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode2, tokens2);
 
 	private Tokens tokens3 = new Tokens.TokensBuilder()
 			.buildingName(buildingName3)
@@ -202,7 +203,7 @@ class AddressServiceTest {
 			.addressLine3(addressLine33)
 			.postcode(postcode3).build();
 	
-	private Address address3 = new Address(uprn3, postcodeIn3, postcodeOut3, classificationCode3, censusAddressType, censusEstabType, countryCode, postcode3, tokens3);
+	private Address address3 = new Address(uprn3, postcodeIn3, postcodeOut3, classificationCode3, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode3, tokens3);
 
 	private Tokens tokens4 = new Tokens.TokensBuilder()
 			.organisationName("")
@@ -227,10 +228,10 @@ class AddressServiceTest {
 			.addressLine3(addressLine43)
 			.postcode(postcode4).build();
 	
-	private Address address4 = new Address(uprn4, postcodeIn4, postcodeOut4, classificationCode, censusAddressType, censusEstabType, countryCode, postcode4, tokens4);
+	private Address address4 = new Address(uprn4, postcodeIn4, postcodeOut4, classificationCode, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode4, tokens4);
 
 	private Tokens tokens5 = new Tokens.TokensBuilder()
-			.organisationName("")
+			.organisationName(organisationName)
 			.departmentName("")
 			.buildingName(buildingName5)
 			.subBuildingName(subBuildingName5)
@@ -246,12 +247,14 @@ class AddressServiceTest {
 			.townName(townName)
 			.addressLevel(addressLevel)
 			.uprn(uprn5)
+			.latitude(latitude)
+			.longitude(longitude)
 			.addressLine1(addressLine51)
 			.addressLine2(addressLine52)
 			.addressLine3(addressLine53)
 			.postcode(postcode5).build();
 	
-	private Address address5 = new Address(uprn5, postcodeIn5, postcodeOut5, "", censusAddressType, censusEstabType, countryCode, postcode5, tokens5);
+	private Address address5 = new Address(uprn5, postcodeIn5, postcodeOut5, classificationCode, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode5, tokens5);
 	
 	private Tokens tokens6 = new Tokens.TokensBuilder()
 			.organisationName("")
@@ -273,7 +276,7 @@ class AddressServiceTest {
 			.addressLine3(addressLine63)
 			.postcode(postcode5).build();
 	
-	private Address address6 = new Address(uprn6, postcodeIn5, postcodeOut5, classificationCode3, censusAddressType, censusEstabType, countryCode2, postcode5, tokens6);
+	private Address address6 = new Address(uprn6, postcodeIn5, postcodeOut5, classificationCode3, censusAddressType, censusEstabType, censusEstabUprn, countryCode2, postcode5, tokens6);
 	
 	public AddressServiceTest() throws IOException {
 		
@@ -338,6 +341,7 @@ class AddressServiceTest {
 		csvAddress.setEstabType(censusEstabType);
 		csvAddress.setAddressType(censusAddressType);
 		csvAddress.setAddressLevel(addressLevel);
+		csvAddress.setEstabUprn("808");
 		
 		TokeniserResponse mockTokeniserResponse = new TokeniserResponse();
 		mockTokeniserResponse.setOrganisationName("");
@@ -372,6 +376,7 @@ class AddressServiceTest {
 		csvAddress2.setEstabType(censusEstabType);
 		csvAddress2.setAddressType(censusAddressType);
 		csvAddress2.setAddressLevel(addressLevel);
+		csvAddress2.setEstabUprn("808");
 		
 		TokeniserResponse mockTokeniserResponse2 = new TokeniserResponse();
 		mockTokeniserResponse2.setOrganisationName("");
@@ -463,9 +468,14 @@ class AddressServiceTest {
 		pubSubAddress.setEstabType(censusEstabType);
 		pubSubAddress.setAddressType(censusAddressType);
 		pubSubAddress.setAddressLevel(addressLevel);
+		pubSubAddress.setLatitude(latitude);
+		pubSubAddress.setLongitude(longitude);
+		pubSubAddress.setEstabUprn(String.valueOf(censusEstabUprn));
+		pubSubAddress.setAbpCode(classificationCode);
+		pubSubAddress.setOrganisationName(organisationName);
 		
 		TokeniserResponse mockTokeniserResponse = new TokeniserResponse();
-		mockTokeniserResponse.setOrganisationName("");
+		mockTokeniserResponse.setOrganisationName("ACME FLOWERS LTD");
 		mockTokeniserResponse.setDepartmentName("");
 		mockTokeniserResponse.setSubBuildingName("BERTH 3");
 		mockTokeniserResponse.setBuildingName("ABBOTTS WHARF MOORINGS");
@@ -514,7 +524,7 @@ class AddressServiceTest {
 		// ES should have the new record
 		StepVerifier.create(repository.findById("9998")).assertNext(address -> {
 			assertNotNull(address);
-			assertEquals(address.getUprn(), 9998);		
+			assertEquals(address.getUprn(), 9998L);		
 		})
 		.expectNextCount(0)
 		.verifyComplete();
@@ -525,9 +535,9 @@ class AddressServiceTest {
 	public void testFindByAddressContaining() {
 			
 		// There should only be 1 address
-		StepVerifier.create(repository.findByTokensAddressAllContaining("FLOWERS")).assertNext(address -> {
+		StepVerifier.create(repository.findByTokensAddressAllContaining("PONTOON")).assertNext(address -> {
 			logger.info(address.toString());
-			assertThat(address.getTokens().getAddressAll(), containsString("FLOWERS"));
+			assertThat(address.getTokens().getAddressAll(), containsString("PONTOON"));
 		})
 		.expectNextCount(0)
 		.verifyComplete();
@@ -539,7 +549,42 @@ class AddressServiceTest {
 				
 		StepVerifier.create(repository.findById("99")).assertNext(address -> {
 			assertNotNull(address);
-			assertEquals(address.getUprn(), 99);		
+			assertEquals(address.getUprn(), 99L);
+		})
+		.expectNextCount(0)
+		.verifyComplete();
+	}
+	
+	@Test
+	@Order(value = 7)
+	public void testAddressUpdate( ) {
+		
+		Address addressUpdate = address;
+		addressUpdate.setClassificationCode(classificationCode2);
+
+		// Should have one record with uprn=99 classification code change from RD03 -> RD06
+		// Before update
+		StepVerifier.create(repository.findById("99")).assertNext(address -> {
+			assertNotNull(address);
+			assertEquals(address.getUprn(), 99L);	
+			assertEquals(address.getClassificationCode(), classificationCode);
+		})
+		.expectNextCount(0)
+		.verifyComplete();
+		
+		// Updated as has same uprn
+		StepVerifier.create(addressService.createAddress(addressUpdate)).assertNext(response -> {
+			logger.info(response.toString());
+			assertNotNull(response);
+			assertEquals(address.getUprn(), response.getUprn());
+			assertEquals(address.getTokens().getAddressAll(), response.getTokens().getAddressAll());
+		}).verifyComplete();
+		
+		// After update
+		StepVerifier.create(repository.findById("99")).assertNext(address -> {
+			assertNotNull(address);
+			assertEquals(address.getUprn(), 99L);
+			assertEquals(address.getClassificationCode(), classificationCode2);
 		})
 		.expectNextCount(0)
 		.verifyComplete();

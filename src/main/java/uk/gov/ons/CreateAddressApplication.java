@@ -20,6 +20,8 @@ import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.ons.entities.Message;
@@ -71,7 +73,7 @@ public class CreateAddressApplication {
 			logger.debug("Message arrived! Payload: " + new String((byte[]) message.getPayload()));
 			
 			try {
-				Message msg = new ObjectMapper().readValue((byte[]) message.getPayload(), Message.class);
+				Message msg = new ObjectMapper().setDefaultSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY)).readValue((byte[]) message.getPayload(), Message.class);
 				logger.debug(String.format("Message: %s", msg.toString()));
 				
 				// Save the new address to ES
