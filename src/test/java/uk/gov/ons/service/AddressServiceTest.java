@@ -2,11 +2,15 @@ package uk.gov.ons.service;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -24,10 +28,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
+import org.springframework.cloud.gcp.pubsub.support.AcknowledgeablePubsubMessage;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.mockwebserver.Dispatcher;
@@ -41,6 +51,7 @@ import uk.gov.ons.entities.Address;
 import uk.gov.ons.entities.Address.CountryCode;
 import uk.gov.ons.entities.CSVAddress;
 import uk.gov.ons.entities.InputAddress;
+import uk.gov.ons.entities.Message;
 import uk.gov.ons.entities.Tokens;
 import uk.gov.ons.json.TokeniserResponse;
 import uk.gov.ons.repository.AddressRepository;
@@ -49,6 +60,7 @@ import uk.gov.ons.repository.AddressRepository;
 @ExtendWith(SpringExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
 @TestMethodOrder(OrderAnnotation.class)
+@ActiveProfiles("test")
 class AddressServiceTest {
 	
 	private Logger logger = LoggerFactory.getLogger(AddressServiceTest.class);
@@ -62,7 +74,10 @@ class AddressServiceTest {
 	private final ElasticsearchContainer elastic;
 	
 	private static MockWebServer mockBackEnd;
-
+	
+	@Autowired
+    private PubSubTemplate template;
+	
 	private String organisationName = "ACME FLOWERS LTD";
 	private Short buildingNumber = 78;
 	private Short buildingNumber5 = 89;
@@ -588,5 +603,40 @@ class AddressServiceTest {
 		})
 		.expectNextCount(0)
 		.verifyComplete();
+	}
+	
+	@Test
+	@Order(value = 8)
+	public void testPubSubMsgGood() throws Exception {	
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		Message expectedMsg = objectMapper.readValue(new File("src/test/resources/pubsub_msg.json"), Message.class);
+		
+		template.publish("new-address-test", Files.readString(Path.of("src/test/resources/pubsub_msg.json")));
+		
+		List<AcknowledgeablePubsubMessage> messages = template.pull("new-address-subscription-test", 1, false);	
+		Message actualMessage = objectMapper.setDefaultSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY)).readValue(messages.get(0).getPubsubMessage().getData().toByteArray(), Message.class);
+
+        assertEquals(expectedMsg, actualMessage);
+	}
+	
+	@Test
+	@Order(value = 9)
+	public void testPubSubMsgBad() throws Exception {
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		
+		template.publish("new-address-test", "{\"Message\":\"BAD!!!\"}");
+		
+		List<AcknowledgeablePubsubMessage> messages = template.pull("new-address-subscription-test", 1, false);	
+		
+		Exception exception = assertThrows(JsonMappingException.class, () -> {
+			objectMapper.setDefaultSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY)).readValue(messages.get(0).getPubsubMessage().getData().toByteArray(), Message.class);
+	    });
+
+		String expectedMessage = "BAD!!!";
+	    String actualMessage = exception.getMessage();
+	 
+	    assertTrue(actualMessage.contains(expectedMessage));
 	}
 }
