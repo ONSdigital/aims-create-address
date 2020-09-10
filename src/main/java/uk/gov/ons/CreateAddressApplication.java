@@ -2,8 +2,6 @@ package uk.gov.ons;
 
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,15 +22,15 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.entities.Message;
 import uk.gov.ons.repository.AddressRepository;
 import uk.gov.ons.service.AddressService;
 
+@Slf4j
 @SpringBootApplication
 public class CreateAddressApplication {
 
-	private Logger logger = LoggerFactory.getLogger(CreateAddressApplication.class);
-	
 	@Autowired
 	private AddressService addressService;
 	
@@ -70,11 +68,11 @@ public class CreateAddressApplication {
 	@ServiceActivator(inputChannel = "pubsubInputChannel")
 	public MessageHandler messageReceiver() {
 		return message -> {
-			logger.debug("Message arrived! Payload: " + new String((byte[]) message.getPayload()));
+			log.debug("Message arrived! Payload: " + new String((byte[]) message.getPayload()));
 			
 			try {
 				Message msg = new ObjectMapper().setDefaultSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY)).readValue((byte[]) message.getPayload(), Message.class);
-				logger.debug(String.format("Message: %s", msg.toString()));
+				log.debug(String.format("Message: %s", msg.toString()));
 				
 				// Save the new address to ES
 				addressService.createAddressFromMsg(msg.getPayload().getNewAddress().getCollectionCase().getAddress()).subscribe(
@@ -83,7 +81,7 @@ public class CreateAddressApplication {
 								
 								// Show ES Content for new Address - DEMO
 								addressRepository.findById(String.valueOf(response.getUprn())).subscribe(address -> {
-									logger.debug(String.format("ES content for new address with ID: %s = %s", response.getUprn(), address.toString()));
+									log.debug(String.format("ES content for new address with ID: %s = %s", response.getUprn(), address.toString()));
 								});
 								
 								// Send ACK
@@ -91,10 +89,10 @@ public class CreateAddressApplication {
 										.get(GcpPubSubHeaders.ORIGINAL_MESSAGE, BasicAcknowledgeablePubsubMessage.class);
 								originalMessage.ack();	
 							}
-							logger.debug(String.format("Response: %s",  response != null ? response.toString() : "Response is null!"));
+							log.debug(String.format("Response: %s",  response != null ? response.toString() : "Response is null!"));
 						});
 			} catch (IOException e) {
-				logger.info(String.format("Unable to read message: %s", e));
+				log.info(String.format("Unable to read message: %s", e));
 			}
 		};
 	}

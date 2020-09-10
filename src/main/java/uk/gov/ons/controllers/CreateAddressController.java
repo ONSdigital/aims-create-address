@@ -5,8 +5,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -20,14 +18,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.entities.CSVAddress;
 import uk.gov.ons.service.AddressService;
 
+@Slf4j
 @Controller
 public class CreateAddressController {
-	
-	private Logger logger = LoggerFactory.getLogger(CreateAddressController.class);
-	
+		
 	@Autowired
 	private AddressService addressService;
 	
@@ -58,7 +56,7 @@ public class CreateAddressController {
 
 		        // Add the addresses to Elasticsearch
 		        addressService.createAddressesFromCsv(addresses).doOnNext(output -> {
-		        	logger.debug(String.format("Added: %s", output.toString()));
+		        	log.debug(String.format("Added: %s", output.toString()));
 		        	
 		        	/* 
 		        	 * This is very basic at the moment and just returns to the view the addresses 

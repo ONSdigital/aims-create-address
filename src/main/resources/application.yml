@@ -25,6 +25,7 @@ management:
       enabled: true
 logging:
   level:
+    root: DEBUG
     uk:
       gov:
         ons: DEBUG
