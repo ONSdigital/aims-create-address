@@ -40,6 +40,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -56,6 +57,7 @@ import uk.gov.ons.entities.Tokens;
 import uk.gov.ons.json.TokeniserResponse;
 import uk.gov.ons.repository.AddressRepository;
 
+@Slf4j
 @SpringBootTest()
 @ExtendWith(SpringExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
@@ -63,8 +65,6 @@ import uk.gov.ons.repository.AddressRepository;
 @ActiveProfiles("test")
 class AddressServiceTest {
 	
-	private Logger logger = LoggerFactory.getLogger(AddressServiceTest.class);
-
 	@Autowired
 	private AddressService addressService;
 	
@@ -324,7 +324,7 @@ class AddressServiceTest {
 	public void testCreateAddress() {
 
 		StepVerifier.create(addressService.createAddress(address)).assertNext(response -> {
-			logger.info(response.toString());
+			log.info(response.toString());
 			assertNotNull(response);
 			assertEquals(address.getUprn(), response.getUprn());
 			assertEquals(address.getTokens().getAddressAll(), response.getTokens().getAddressAll());
@@ -551,7 +551,7 @@ class AddressServiceTest {
 			
 		// There should only be 1 address
 		StepVerifier.create(repository.findByTokensAddressAllContaining("PONTOON")).assertNext(address -> {
-			logger.info(address.toString());
+			log.info(address.toString());
 			assertThat(address.getTokens().getAddressAll(), containsString("PONTOON"));
 		})
 		.expectNextCount(0)
@@ -589,7 +589,7 @@ class AddressServiceTest {
 		
 		// Updated as has same uprn
 		StepVerifier.create(addressService.createAddress(addressUpdate)).assertNext(response -> {
-			logger.info(response.toString());
+			log.info(response.toString());
 			assertNotNull(response);
 			assertEquals(address.getUprn(), response.getUprn());
 			assertEquals(address.getTokens().getAddressAll(), response.getTokens().getAddressAll());

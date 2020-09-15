@@ -12,8 +12,6 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
@@ -21,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -32,11 +31,10 @@ import uk.gov.ons.json.TokeniserResponse;
 import uk.gov.ons.repository.AddressRepository;
 import uk.gov.ons.util.AddressMapper;
 
+@Slf4j
 @Service
 public class AddressService {
 
-	private Logger logger = LoggerFactory.getLogger(AddressService.class);
-	
 	@Autowired
 	private AddressRepository addressRepository;
 	
@@ -71,17 +69,17 @@ public class AddressService {
 							RequestOptions.DEFAULT);
 
 					if (!createIndexResponse.isAcknowledged()) {
-						logger.error(String.format("Can not create index %s", indexName));
+						log.error(String.format("Can not create index %s", indexName));
 						throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName));
 					}
 
 				} catch (IOException ioe) {
-					logger.error(String.format("Can not create index %s", indexName), ioe);
+					log.error(String.format("Can not create index %s", indexName), ioe);
 					throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName), ioe);
 				}
 			}
 		} catch (IOException ioe) {
-			logger.error(String.format("Can not create index %s", indexName), ioe);
+			log.error(String.format("Can not create index %s", indexName), ioe);
 			throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName), ioe);
 		}
 	}
@@ -107,19 +105,19 @@ public class AddressService {
 		return buildAddress(pubSubAddress)
 				.flatMap(address -> addressRepository.save(address))
 				.doOnError(ex -> Mono.just("Error: " + ex.getMessage()))
-				.doOnSuccess(address -> logger.debug(String.format("Added address: %s", address)));
+				.doOnSuccess(address -> log.debug(String.format("Added address: %s", address)));
 	}	
 	
 	private Mono<Address> buildAddress(InputAddress inputAddress) {
 		
-		logger.debug(String.format("Input Address: %s", inputAddress.toString()));
+		log.debug(String.format("Input Address: %s", inputAddress.toString()));
 		
 		return webClient.get()
 				.uri(path, inputAddress.getAddressAll())
 				.retrieve()
 				.bodyToMono(TokeniserResponse.class)
 				.map(tokeniserResponse -> {
-					logger.debug(String.format("Tokeniser Response: %s", tokeniserResponse.toString()));
+					log.debug(String.format("Tokeniser Response: %s", tokeniserResponse.toString()));
 	                Address address = AddressMapper.from(inputAddress, tokeniserResponse);
 	                return address;});
 	}
