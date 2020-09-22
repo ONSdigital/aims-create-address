@@ -73,12 +73,12 @@ The script uses a PubSub emulator as described in [this](https://github.com/marc
 ```
 The `docker-compose` script will deploy the following apps:
 
-* [Elasticsearch 7.3.1](https://www.elastic.co/guide/en/elasticsearch/reference/7.3/release-notes-7.3.1.html)
-* [Cerebro](https://github.com/lmenezes/cerebro)
-* [Kibana 7.3.1](https://www.elastic.co/guide/en/kibana/7.3/release-notes-7.3.1.html)
-* [address-index-parser](https://github.com/ONSdigital/aims-address-parser)
-* address-index-create-api
-* [address-index-pubsub-publisher](https://github.com/ONSdigital/aims-pubsub-publisher)
-* [pubsub-emulator](https://github.com/marcelcorso/gcloud-pubsub-emulator)
-
-
+|App|Access|
+|---|---|
+|[Elasticsearch 7.3.1](https://www.elastic.co/guide/en/elasticsearch/reference/7.3/release-notes-7.3.1.html)|Access via Cerebro or Kibana.|
+|[Cerebro](https://github.com/lmenezes/cerebro)|<http://localhost:1234> and then <http://es:9200>|
+|[Kibana 7.3.1](https://www.elastic.co/guide/en/kibana/7.3/release-notes-7.3.1.html)|<http://localhost:5601>|
+|[address-index-parser](https://github.com/ONSdigital/aims-address-parser)|Health:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<http://localhost:8081/actuator/health><br>Parse Address:&nbsp;<http://localhost:8081/tokens?address=Acme%20Flowers%20Ltd%20First%20And%20Second%20Floor%20Flat%2039b%20Cranbrook%20Road%20Windleybury%20GU166DE>|
+|address-index-create-api|Health:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/actuator/health<br>Load CSV: http://localhost:8080/>|
+|[address-index-pubsub-publisher](https://github.com/ONSdigital/aims-pubsub-publisher)|Publish: <http://localhost:8082/>|
+|[pubsub-emulator](https://github.com/marcelcorso/gcloud-pubsub-emulator)|Test: <http://localhost:8681/>|
