@@ -1,0 +1,77 @@
+version: '3.8'
+services:
+  es:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.3.1"
+    container_name: elasticsearch
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+      - essnapshot:/usr/share/elasticsearch/backup
+    environment:
+      - cluster.name=docker-cluster-ai
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - path.repo=/usr/share/elasticsearch/backup
+  cerebro:
+    image: "lmenezes/cerebro"
+    ports:
+     - "1234:9000"
+  kibana:
+    container_name: kibana
+    image: "docker.elastic.co/kibana/kibana:7.3.1"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://es:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - "es"
+  parser:
+    container_name: parser
+    image: "address-index-parser:latest"
+    ports:
+     - "8081:8081"
+  create-api:
+    container_name: create-api
+    volumes:
+      - ./scripts:/scripts
+    image: "address-index-create-api:latest"
+    ports:
+     - "8080:8080"
+    environment:
+      - SPRING_ELASTICSEARCH_REST_URIS=http://es:9200
+      - SPRING_DATA_ELASTICSEARCH_CLIENT_REACTIVE_ENDPOINTS=es:9200
+      - AIMS_TOKENISER_URI=http://parser:8081
+      - SPRING_CLOUD_GCP_PROJECT-ID=aims-local
+      - SPRING_CLOUD_GCP_PUBSUB_EMULATOR-HOST=pubsub:8681
+      - LOGGING_LEVEL_ROOT=INFO
+    depends_on:
+      - "parser"
+      - "pubsub"
+    command: ["./scripts/wait-for-it.sh", "es:9200", "--", "java","-jar", "/app.jar"]
+  pubsub-publisher:
+    container_name: pubsub-publisher
+    volumes:
+      - ./scripts:/scripts
+    image: "address-index-pubsub-publisher:latest"
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_CLOUD_GCP_PROJECT-ID=aims-local
+      - SPRING_CLOUD_GCP_PUBSUB_EMULATOR-HOST=pubsub:8681
+    depends_on:
+      - "pubsub"
+    command: ["./scripts/wait-for-it.sh", "pubsub:8682", "--", "java","-jar", "/app.jar"]
+  pubsub:
+    container_name: pubsub-emulator
+    image: messagebird/gcloud-pubsub-emulator:latest
+    ports:
+      - 8681:8681
+    environment:
+      - PUBSUB_PROJECT1=aims-local,new-address:new-address-subscription
+volumes:
+  esdata1:
+    driver: local
+  essnapshot:
+    driver: local
+  scripts:
+    driver: local
