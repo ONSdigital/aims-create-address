@@ -63,9 +63,9 @@ services:
     command: ["./scripts/wait-for-it.sh", "pubsub:8682", "--", "java","-jar", "/app.jar"]
   pubsub:
     container_name: pubsub-emulator
-    image: messagebird/gcloud-pubsub-emulator:latest
+    image: "messagebird/gcloud-pubsub-emulator:latest"
     ports:
-      - 8681:8681
+      - "8681:8681"
     environment:
       - PUBSUB_PROJECT1=aims-local,new-address:new-address-subscription
 volumes:
