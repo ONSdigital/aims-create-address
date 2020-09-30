@@ -60,3 +60,25 @@ An API for loading addresses into an Elasticsearch index. Addresses can be loade
   |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
   |1|1|HH|Household|U|RD03||56 Some Avenue|||Townbury|AB12 3CD|51.4732839|-2.5219149|E00073888|E01014624|E02003029|E06000023|E12000009|2|2|HH_LFNR1E|TWH1-HA||0|1||
   |2|2|HH|Household|U|RD04||8 Some Street|||Townbury|AB12 3CD|51.4694158|-2.563189|E00073597|E01014569|E02006890|E06000023|E12000009|4|2|HH_LFNR2E|TWH1-HA||0|0||
+
+### Running the Create API Locally with Docker
+
+It is possible to run the entire suite of apps required for the create API in a local environment using the `docker-compose` script included.
+The script uses a PubSub emulator as described in [this](https://github.com/marcelcorso/gcloud-pubsub-emulator) GitHub repo. It also uses this [wait-for-it](https://github.com/vishnubob/wait-for-it) script before deploying dependent apps. The Elasticsearch deployment uses volumes to persist data over restarts and allows snapshots to be created. You will have to create the Address Index app images locally:
+
+```
+	docker build --build-arg JAR_FILE=build/libs/*.jar -t address-index-parser .
+	docker build --build-arg JAR_FILE=build/libs/*.jar -t address-index-create-api .
+	docker build --build-arg JAR_FILE=build/libs/*.jar -t address-index-pubsub-publisher .
+```
+The `docker-compose` script will deploy the following apps:
+
+|App|Access|
+|---|---|
+|[Elasticsearch 7.3.1](https://www.elastic.co/guide/en/elasticsearch/reference/7.3/release-notes-7.3.1.html)|Access via Cerebro or Kibana.|
+|[Cerebro](https://github.com/lmenezes/cerebro)|<http://localhost:1234> and then <http://es:9200>|
+|[Kibana 7.3.1](https://www.elastic.co/guide/en/kibana/7.3/release-notes-7.3.1.html)|<http://localhost:5601>|
+|[address-index-parser](https://github.com/ONSdigital/aims-address-parser)|<http://localhost:8081/tokens?address=Acme%20Flowers%20Ltd%20First%20And%20Second%20Floor%20Flat%2039b%20Cranbrook%20Road%20Windleybury%20GU166DE>|
+|address-index-create-api|<http://localhost:8080>|
+|[address-index-pubsub-publisher](https://github.com/ONSdigital/aims-pubsub-publisher)|<http://localhost:8082>|
+|[pubsub-emulator](https://github.com/marcelcorso/gcloud-pubsub-emulator)|<http://localhost:8681>|
