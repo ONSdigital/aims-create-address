@@ -16,12 +16,16 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
     enabled-by-default: false
   endpoint:
     info:
       enabled: true
     health:
+      enabled: true
+    metrics:
+      enabled: true
+    prometheus:
       enabled: true
 logging:
   level:
