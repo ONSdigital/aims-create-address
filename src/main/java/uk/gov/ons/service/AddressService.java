@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import uk.gov.ons.entities.Address;
+import uk.gov.ons.entities.AuxAddress;
 import uk.gov.ons.entities.CSVAddress;
 import uk.gov.ons.entities.InputAddress;
 import uk.gov.ons.exception.CreateAddressRuntimeException;
@@ -92,7 +93,7 @@ public class AddressService {
 		return addressRepository.saveAll(addresses);
 	}
 	
-	public Flux<Address> createAddressesFromCsv(List<CSVAddress> addresses) {
+	public Flux<Address> createAddressesFromCsv(List<AuxAddress> addresses) {
 	
 		return Flux.fromIterable(addresses).parallel().runOn(Schedulers.elastic())
 				.flatMap(csvAddress -> addressRepository.saveAll(buildAddress(csvAddress)))

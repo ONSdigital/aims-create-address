@@ -29,10 +29,10 @@ management:
       enabled: true
 logging:
   level:
-    root: DEBUG
+    root: INFO
     uk:
       gov:
-        ons: DEBUG
+        ons: INFO
     org:
       springframework:
         data:

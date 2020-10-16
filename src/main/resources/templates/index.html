@@ -11,6 +11,16 @@
 <body>
 
 <div class="container-fluid py-5">
+
+	<div class="row">
+        <div class="col-3 mx-auto">
+        	<h1>Indices: </h1>
+	    	<select class="form-control" th:field="*{indices}" multiple="multiple">
+	     		<option th:each="index : ${indices}" th:value="${index}" th:text="${index}"/>
+	     	</select>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-10 mx-auto">
             <h1>Upload CSV File of Addresses</h1>

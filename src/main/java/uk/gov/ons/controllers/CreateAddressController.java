@@ -1,10 +1,15 @@
 package uk.gov.ons.controllers;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
 
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetIndexResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -19,6 +24,7 @@ import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.ons.entities.AuxAddress;
 import uk.gov.ons.entities.CSVAddress;
 import uk.gov.ons.service.AddressService;
 
@@ -29,9 +35,30 @@ public class CreateAddressController {
 	@Autowired
 	private AddressService addressService;
 	
+	@Autowired
+	private RestHighLevelClient client;
+	
     @GetMapping(value = "/")
     @ResponseStatus(HttpStatus.OK)
-    public String index() {
+    public String index(Model model) {
+    	
+    	GetIndexRequest request = new GetIndexRequest("*");
+    	GetIndexResponse response;
+    	
+		try {
+			response = client.indices().get(request, RequestOptions.DEFAULT);
+			
+			if (response.getIndices().length > 0) {
+				model.addAttribute("indices", response.getIndices());		
+			} else {
+				model.addAttribute("indices", new String[0]);
+			}
+				
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
         return "index";
     }
 
@@ -47,12 +74,12 @@ public class CreateAddressController {
             // parse CSV file
             try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             	
-            	CsvToBean<CSVAddress> csvToBean = new CsvToBeanBuilder<CSVAddress>(reader)
-					.withType(CSVAddress.class)
+            	CsvToBean<AuxAddress> csvToBean = new CsvToBeanBuilder<AuxAddress>(reader)
+					.withType(AuxAddress.class)
 					.withIgnoreLeadingWhiteSpace(true)
 					.build();
         
-           	    List<CSVAddress> addresses = csvToBean.parse();
+           	    List<AuxAddress> addresses = csvToBean.parse();
 
 		        // Add the addresses to Elasticsearch
 		        addressService.createAddressesFromCsv(addresses).doOnNext(output -> {

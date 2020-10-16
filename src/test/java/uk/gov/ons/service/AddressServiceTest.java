@@ -50,6 +50,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import uk.gov.ons.entities.Address;
 import uk.gov.ons.entities.Address.CountryCode;
+import uk.gov.ons.entities.AuxAddress;
 import uk.gov.ons.entities.CSVAddress;
 import uk.gov.ons.entities.InputAddress;
 import uk.gov.ons.entities.Message;
@@ -344,7 +345,7 @@ class AddressServiceTest {
 	@Order(value = 3)
 	public void testCreateAddressesFromCsv() throws Exception{
 			
-		CSVAddress csvAddress = new CSVAddress();
+		AuxAddress csvAddress = new AuxAddress();
 		csvAddress.setUprn("999");
 		csvAddress.setRegion("E12000009");
 		csvAddress.setAddressLine1("Apartment 10-64 Gasholders Building");
@@ -379,7 +380,7 @@ class AddressServiceTest {
 		mockTokeniserResponse.setPostcodeIn("6DG");
 		mockTokeniserResponse.setPostcodeOut("GU16");
 		
-		CSVAddress csvAddress2 = new CSVAddress();
+		AuxAddress csvAddress2 = new AuxAddress();
 		csvAddress2.setUprn("1234567891013");
 		csvAddress2.setRegion("W99999999");
 		csvAddress2.setAddressLine1("Berth 42");
