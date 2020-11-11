@@ -11,7 +11,7 @@ An API for loading addresses into an Elasticsearch index. Addresses can be loade
    - Call the topic `new-addresses`.
    - Call the new subscription `new-address-subscription` and keep the default settings. A dead letter topic can also be setup but is not necessary for testing.
 5. Update the `spring.cloud.gcp.project-id` attribute in the `application.yml` file to the GCP project you created the PubSub topic in.
-6. Run the Spring Boot app and send a test message. The PubSub message should use the following format:
+6. Run the Spring Boot app and send a test message. The app will ignore unexpected PubSub fields. The UPRN field is mandatory. The service will NACK the message if it is not present. NACK'd messages can be found on the dead letter topic if it has been created. The ideal PubSub message should use the following format:
 
   ```json
     {
