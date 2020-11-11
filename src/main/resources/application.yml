@@ -29,14 +29,14 @@ management:
       enabled: true
 logging:
   level:
-    root: DEBUG
+    root: INFO
     uk:
       gov:
-        ons: DEBUG
+        ons: INFO
     org:
       springframework:
         data:
-          elasticsearch: TRACE
+          elasticsearch: INFO
 aims:
   pubsub:
     subscription: new-address-subscription

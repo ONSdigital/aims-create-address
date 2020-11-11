@@ -24,8 +24,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
@@ -37,8 +35,8 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.mockwebserver.Dispatcher;
@@ -610,9 +608,9 @@ class AddressServiceTest {
 	public void testPubSubMsgGood() throws Exception {	
 		
 		ObjectMapper objectMapper = new ObjectMapper();
-		Message expectedMsg = objectMapper.readValue(new File("src/test/resources/pubsub_msg.json"), Message.class);
+		Message expectedMsg = objectMapper.readValue(new File("src/test/resources/pubsub_good_msg.json"), Message.class);
 		
-		template.publish("new-address-test", Files.readString(Path.of("src/test/resources/pubsub_msg.json")));
+		template.publish("new-address-test", Files.readString(Path.of("src/test/resources/pubsub_good_msg.json")));
 		
 		List<AcknowledgeablePubsubMessage> messages = template.pull("new-address-subscription-test", 1, false);	
 		Message actualMessage = objectMapper.setDefaultSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY)).readValue(messages.get(0).getPubsubMessage().getData().toByteArray(), Message.class);
@@ -624,19 +622,36 @@ class AddressServiceTest {
 	@Order(value = 9)
 	public void testPubSubMsgBad() throws Exception {
 		
+		// Test that a missing mandatory field fails
 		ObjectMapper objectMapper = new ObjectMapper();
-		
-		template.publish("new-address-test", "{\"Message\":\"BAD!!!\"}");
+				
+		template.publish("new-address-test", Files.readString(Path.of("src/test/resources/pubsub_bad_msg.json")));
 		
 		List<AcknowledgeablePubsubMessage> messages = template.pull("new-address-subscription-test", 1, false);	
 		
-		Exception exception = assertThrows(JsonMappingException.class, () -> {
+		Exception exception = assertThrows(MismatchedInputException.class, () -> {
 			objectMapper.setDefaultSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY)).readValue(messages.get(0).getPubsubMessage().getData().toByteArray(), Message.class);
-	    });
+		});
+				
+		String expectedMessage = "Missing required creator property 'uprn'";
+		String actualMessage = exception.getMessage();
+		
+		assertTrue(actualMessage.contains(expectedMessage));		
+	}
+	
+	@Test
+	@Order(value = 10)
+	public void testPubSubMsgExtra() throws Exception {
+		
+		// Test that extra fields don't cause a problem 
+		ObjectMapper objectMapper = new ObjectMapper();
+		Message expectedMsg = objectMapper.readValue(new File("src/test/resources/pubsub_extra_msg.json"), Message.class);
+		
+		template.publish("new-address-test", Files.readString(Path.of("src/test/resources/pubsub_extra_msg.json")));
+		
+		List<AcknowledgeablePubsubMessage> messages = template.pull("new-address-subscription-test", 1, false);	
+		Message actualMessage = objectMapper.setDefaultSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY)).readValue(messages.get(0).getPubsubMessage().getData().toByteArray(), Message.class);
 
-		String expectedMessage = "BAD!!!";
-	    String actualMessage = exception.getMessage();
-	 
-	    assertTrue(actualMessage.contains(expectedMessage));
+        assertEquals(expectedMsg, actualMessage);
 	}
 }
