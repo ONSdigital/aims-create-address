@@ -6,6 +6,8 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +36,7 @@ import uk.gov.ons.util.AddressMapper;
 
 @Slf4j
 @Service
+@Validated
 public class AddressService {
 
 	@Autowired
@@ -100,7 +104,7 @@ public class AddressService {
 				.doOnError(ex -> Flux.just("Error: " + ex.getMessage()));
 	}
 	
-	public Mono<Address> createAddressFromMsg(InputAddress pubSubAddress) {
+	public Mono<Address> createAddressFromMsg(@Valid InputAddress pubSubAddress) {
 	
 		return buildAddress(pubSubAddress)
 				.flatMap(address -> addressRepository.save(address))
