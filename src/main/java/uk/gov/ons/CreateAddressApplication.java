@@ -2,6 +2,8 @@ package uk.gov.ons;
 
 import java.io.IOException;
 
+import javax.validation.ConstraintViolationException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -93,6 +95,13 @@ public class CreateAddressApplication {
 						});
 			} catch (IOException e) {
 				log.info(String.format("Unable to read message: %s", e));
+			} catch (ConstraintViolationException cve) {
+				log.info(String.format("Unable to read message: %s", cve));
+				
+				// Send NACK
+				BasicAcknowledgeablePubsubMessage originalMessage = message.getHeaders()
+						.get(GcpPubSubHeaders.ORIGINAL_MESSAGE, BasicAcknowledgeablePubsubMessage.class);
+				originalMessage.nack();	
 			}
 		};
 	}
