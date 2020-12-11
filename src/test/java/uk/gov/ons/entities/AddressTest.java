@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.geo.Point;
 
-import uk.gov.ons.entities.Address.CountryCode;
+import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 
 class AddressTest {
 
@@ -33,7 +33,7 @@ class AddressTest {
 	private String censusAddressType = "HH";
 	private String censusEstabType = "Household";
 	private Long censusEstabUprn = 808L;
-	private Address.CountryCode countryCode = CountryCode.E;
+	private CountryCode countryCode = CountryCode.E;
 	
 	private Tokens tokens = new Tokens.TokensBuilder()
 			.organisationName(organisationName)

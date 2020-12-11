@@ -73,10 +73,10 @@ public class CreateAddressControllerTest {
 	void testUploadAddresses() {
 		
 		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
-		multipartBodyBuilder.part("file", new ClassPathResource("test.csv")).contentType(MediaType.MULTIPART_FORM_DATA);
+		multipartBodyBuilder.part("file", new ClassPathResource("aux-addresses-test.csv")).contentType(MediaType.MULTIPART_FORM_DATA);
 				
-		// Returns page showing addresses that were attempted to load to ES. No indication if it was successful or not.
-		client.post().uri("/upload-csv-file")
+		// Returns page showing addresses that were attempted to load to ES and bad addresses.
+		client.post().uri("/upload-csv-aux-file")
 			.contentType(MediaType.MULTIPART_FORM_DATA)
 			.body(BodyInserters.fromMultipartData(multipartBodyBuilder.build()))
 			.exchange()

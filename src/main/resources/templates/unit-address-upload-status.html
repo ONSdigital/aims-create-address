@@ -46,14 +46,10 @@
 							<th scope="col">MSOA</th>
 							<th scope="col">LAD</th>
 							<th scope="col">REGION</th>
-							<th scope="col">HTC_WILLINGNESS</th>
-							<th scope="col">HTC_DIGITAL</th>
-							<th scope="col">TREATMENT_CODE</th>
-							<th scope="col">FIELDCOORDINATOR_ID</th>
-							<th scope="col">FIELDOFFICER_ID</th>
-							<th scope="col">CE_EXPECTED_CAPACITY</th>
-							<th scope="col">CE_SECURE</th>
-							<th scope="col">PRINT_BATCH</th>
+							<th scope="col">MMSTREET_TOID</th>
+							<th scope="col">MMTOPO_TOID</th>
+							<th scope="col">BNG_NORTHING</th>
+							<th scope="col">BNG_EASTING</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -78,14 +74,10 @@
 							<td th:text="${validatedAddress.address.msoa}"></td>
 							<td th:text="${validatedAddress.address.lad}"></td>
 							<td th:text="${validatedAddress.address.region}"></td>
-							<td th:text="${validatedAddress.address.htcWillingness}"></td>
-							<td th:text="${validatedAddress.address.htcDigital}"></td>
-							<td th:text="${validatedAddress.address.treatmentCode}"></td>
-							<td th:text="${validatedAddress.address.fieldCoordinatorId}"></td>
-							<td th:text="${validatedAddress.address.fieldOfficerId}"></td>
-							<td th:text="${validatedAddress.address.ceExpectedCapacity}"></td>
-							<td th:text="${validatedAddress.address.ceSecure}"></td>
-							<td th:text="${validatedAddress.address.printBatch}"></td>
+							<td th:text="${validatedAddress.address.mmstreetToid}"></td>
+							<td th:text="${validatedAddress.address.mmtopoToid}"></td>
+							<td th:text="${validatedAddress.address.bngNorthing}"></td>
+							<td th:text="${validatedAddress.address.bngEasting}"></td>
 						</tr>
 					</tbody>
 				</table>
@@ -117,14 +109,10 @@
 							<th scope="col">MSOA</th>
 							<th scope="col">LAD</th>
 							<th scope="col">REGION</th>
-							<th scope="col">HTC_WILLINGNESS</th>
-							<th scope="col">HTC_DIGITAL</th>
-							<th scope="col">TREATMENT_CODE</th>
-							<th scope="col">FIELDCOORDINATOR_ID</th>
-							<th scope="col">FIELDOFFICER_ID</th>
-							<th scope="col">CE_EXPECTED_CAPACITY</th>
-							<th scope="col">CE_SECURE</th>
-							<th scope="col">PRINT_BATCH</th>
+							<th scope="col">MMSTREET_TOID</th>
+							<th scope="col">MMTOPO_TOID</th>
+							<th scope="col">BNG_NORTHING</th>
+							<th scope="col">BNG_EASTING</th>
 							<th scope="col">EXCEPTION_REASON</th>
 						</tr>
 					</thead>
@@ -150,14 +138,10 @@
 							<td th:text="${validatedAddress.address.msoa}"></td>
 							<td th:text="${validatedAddress.address.lad}"></td>
 							<td th:text="${validatedAddress.address.region}"></td>
-							<td th:text="${validatedAddress.address.htcWillingness}"></td>
-							<td th:text="${validatedAddress.address.htcDigital}"></td>
-							<td th:text="${validatedAddress.address.treatmentCode}"></td>
-							<td th:text="${validatedAddress.address.fieldCoordinatorId}"></td>
-							<td th:text="${validatedAddress.address.fieldOfficerId}"></td>
-							<td th:text="${validatedAddress.address.ceExpectedCapacity}"></td>
-							<td th:text="${validatedAddress.address.ceSecure}"></td>
-							<td th:text="${validatedAddress.address.printBatch}"></td>						
+							<td th:text="${validatedAddress.address.mmstreetToid}"></td>
+							<td th:text="${validatedAddress.address.mmtopoToid}"></td>
+							<td th:text="${validatedAddress.address.bngNorthing}"></td>
+							<td th:text="${validatedAddress.address.bngEasting}"></td>					
 							<td th:each="v, i : ${validatedAddress.violations}" th:text="${v.message}"></td>
 
 						</tr>

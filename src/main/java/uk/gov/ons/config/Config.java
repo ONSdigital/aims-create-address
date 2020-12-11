@@ -16,8 +16,16 @@ public class Config extends AbstractElasticsearchConfiguration {
 	private String elasticSearchEndpoint;
 	
 	@Getter
-	@Value("${aims.elasticsearch.index.name}")
-	private String indexName;
+	@Value("${aims.elasticsearch.index.aux.name}")
+	private String auxIndexName;
+	
+	@Getter
+	@Value("${aims.elasticsearch.index.fat.name}")
+	private String fatIndexName;
+	
+	@Getter
+	@Value("${aims.elasticsearch.index.skinny.name}")
+	private String skinnyIndexName;
 	
 	@Override
 	public RestHighLevelClient elasticsearchClient() {

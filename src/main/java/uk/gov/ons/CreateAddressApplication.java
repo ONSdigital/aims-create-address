@@ -2,8 +2,6 @@ package uk.gov.ons;
 
 import java.io.IOException;
 
-import javax.validation.ConstraintViolationException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.entities.Message;
-import uk.gov.ons.repository.AddressRepository;
+import uk.gov.ons.exception.CreateAddressException;
+import uk.gov.ons.repository.fat.AddressRepository;
 import uk.gov.ons.service.AddressService;
 
 @Slf4j
@@ -95,8 +94,8 @@ public class CreateAddressApplication {
 						});
 			} catch (IOException e) {
 				log.info(String.format("Unable to read message: %s", e));
-			} catch (ConstraintViolationException cve) {
-				log.info(String.format("Unable to read message: %s", cve));
+			} catch (CreateAddressException cae) {
+				log.info(String.format("Unable to read message: %s", cae));
 				
 				// Send NACK
 				BasicAcknowledgeablePubsubMessage originalMessage = message.getHeaders()

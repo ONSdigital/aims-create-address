@@ -8,21 +8,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 
-
-@Document(indexName = "#{@config.auxIndexName}")
-@TypeAlias("address")
 @AllArgsConstructor
-public @Data class Address {
+public @Data class HybridAddress {
 
 	@Id
 	private Long uprn;
-	private String postcodeIn;
-	private String postcodeOut;
 	private String classificationCode;
 	private String censusAddressType;
 	private String censusEstabType;
-	private Long censusEstabUprn;
-	private CountryCode countryCode;
+//	private Long censusEstabUprn;
 	private String postcode;
-	private Tokens tokens;
+	private CountryCode countryCode;
+//	private String postcodeStreetTown;
+	private String postTown;
+
 }

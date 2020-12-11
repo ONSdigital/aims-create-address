@@ -11,7 +11,14 @@ spring:
           endpoints: localhost:9200
   cloud:
     gcp:
-      project-id: YOUR_GCP_PROJECT_ID_HERE
+      project-id:  census-ai-create-test-2
+      
+  servlet:
+    multipart:
+      max-file-size: 100MB
+  thymeleaf:
+    reactive:
+      max-chunk-size: 8192
 management:
   endpoints:
     web:
@@ -29,20 +36,29 @@ management:
       enabled: true
 logging:
   level:
-    root: INFO
+    root: info
     uk:
       gov:
-        ons: INFO
+        ons: info
     org:
       springframework:
         data:
-          elasticsearch: INFO
+          elasticsearch: trace
 aims:
   pubsub:
     subscription: new-address-subscription
+  gcp:
+    bucket: aims-create-test-2-bad-addresses
   elasticsearch:
+    cluster:
+      fat-enabled: true
     index:
-      name: new-addresses
+      aux:
+        name: new-addresses
+      fat:
+        name: hybrid_39_100316_1603452786355
+      skinny:
+        name: hybrid-skinny_39_100316_1607340534475
   tokeniser:
     uri: http://localhost:8081
     path: /tokens?address={address}
