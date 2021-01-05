@@ -19,7 +19,7 @@ spring:
           endpoints: localhost:9200
   cloud:
     gcp:
-      project-id:  YOUR_GCP_PROJECT_ID_HERE
+      project-id: YOUR_GCP_PROJECT_ID_HERE
   servlet:
     multipart:
       max-file-size: 100MB
