@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.geo.Point;
 
 import lombok.Data;
@@ -31,6 +32,8 @@ public @Data class LpiSkinny {
 	private String locality;
 	@Transient
 	private String townName;
+	@Field(name = "townName")
+	private String townNameUnitAddress;
 	@Transient
 	private String postcode;
 	private String addressBasePostal;
@@ -73,22 +76,18 @@ public @Data class LpiSkinny {
 		this.streetName = builder.streetName;
 		this.locality = builder.locality;
 		this.townName = builder.townName;
+		this.townNameUnitAddress = builder.townNameUnitAddress; // The uncapitalised version
 		this.postcode = builder.postcode;
 		this.addressBasePostal = builder.addressBasePostal;
 		this.country = builder.country;
 		this.easting = builder.easting;
 		this.northing = builder.northing;
 		this.language = builder.language;
-		this.location = new Point(parseStringToOptionalDouble(builder.latitude).orElse(0.0),
-				parseStringToOptionalDouble(builder.longitude).orElse(0.0));
 		this.latitude = builder.latitude;
 		this.longitude = builder.longitude;
 		this.lpiLogicalStatus = builder.lpiLogicalStatus;
-		this.mixedNag = builder.mixedNag;
-		this.mixedNagStart = builder.mixedNagStart;
 		this.mixedWelshNag = builder.mixedWelshNag;
 		this.mixedWelshNagStart = builder.mixedWelshNagStart;
-		this.nagAll = builder.nagAll;
 		this.paoStartNumber = builder.paoStartNumber;
 		this.paoStartSuffix = builder.paoStartSuffix;
 		this.parentUprn = builder.parentUprn;
@@ -101,6 +100,10 @@ public @Data class LpiSkinny {
 		this.addressLine2 = builder.addressLine2;
 		this.addressLine3 = builder.addressLine3;
 		this.nagAll = getNagAll();
+		this.mixedNag = getMixedNag();
+		this.mixedNagStart = getMixedNagStart();
+		this.location = new Point(parseStringToOptionalDouble(builder.latitude).orElse(0.0),
+				parseStringToOptionalDouble(builder.longitude).orElse(0.0));
 	}
 
 	protected static Optional<Double> parseStringToOptionalDouble(String value) {
@@ -118,10 +121,25 @@ public @Data class LpiSkinny {
 	
 	public String getNagAll() {
 		return Stream
-		.of(this.organisationName, this.departmentName, this.subBuildingName, this.buildingName,
-				buildingNumber != null ? this.buildingNumber.toString() : "", this.streetName,
-						this.locality, this.townName, this.postcode)
-		.filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(" "));
+				.of(this.organisationName, this.departmentName, this.subBuildingName, this.buildingName,
+						buildingNumber != null ? this.buildingNumber.toString() : "", this.streetName, this.locality,
+						this.townName, this.postcode)
+				.filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(" "));
+	}
+
+	public String getMixedNag() {
+		return Stream.of(
+				Stream.of(this.addressLine1, this.addressLine2, this.addressLine3, this.townNameUnitAddress,
+						this.postcode).filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(", ")),
+				this.postcode.replaceAll(" ", "")).collect(Collectors.joining(" "));
+	}
+
+	public String getMixedNagStart() {
+		if (!this.getMixedNag().isBlank() && this.getMixedNag().length() > 11) {
+			return this.getMixedNag().substring(0, 11);
+		} else {
+			return this.getMixedNag();
+		}
 	}
 
 	public static class LpiSkinnyBuilder {
@@ -134,6 +152,7 @@ public @Data class LpiSkinny {
 		private String streetName;
 		private String locality;
 		private String townName;
+		private String townNameUnitAddress; // The uncapitalised version
 		private String postcode;
 		private String addressBasePostal;
 		private String country;
@@ -143,11 +162,8 @@ public @Data class LpiSkinny {
 		private String latitude;
 		private String longitude;
 		private Byte lpiLogicalStatus;
-		private String mixedNag;
-		private String mixedNagStart; // keyword
 		private String mixedWelshNag;
 		private String mixedWelshNagStart; // keyword
-		private String nagAll;
 		private Short paoStartNumber;
 		private String paoStartSuffix;
 		private Long parentUprn;
@@ -200,6 +216,11 @@ public @Data class LpiSkinny {
 			return this;
 		}
 		
+		public LpiSkinnyBuilder townNameUnitAddress(String townNameUnitAddress) {
+			this.townNameUnitAddress = townNameUnitAddress;
+			return this;
+		}
+		
 		public LpiSkinnyBuilder postcode(String postcode) {
 			this.postcode = postcode;
 			return this;
@@ -245,16 +266,6 @@ public @Data class LpiSkinny {
 			return this;
 		}
 		
-		public LpiSkinnyBuilder mixedNag(String mixedNag) {
-			this.mixedNag = mixedNag;
-			return this;
-		}
-		
-		public LpiSkinnyBuilder mixedNagStart(String mixedNagStart) {
-			this.mixedNagStart = mixedNagStart;
-			return this;
-		}
-		
 		public LpiSkinnyBuilder mixedWelshNag(String mixedWelshNag) {
 			this.mixedWelshNag = mixedWelshNag;
 			return this;
@@ -262,11 +273,6 @@ public @Data class LpiSkinny {
 		
 		public LpiSkinnyBuilder mixedWelshNagStart(String mixedWelshNagStart) {
 			this.mixedWelshNagStart = mixedWelshNagStart;
-			return this;
-		}
-		
-		public LpiSkinnyBuilder nagAll(String nagAll) {
-			this.nagAll = nagAll;
 			return this;
 		}
 		

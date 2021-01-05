@@ -19,6 +19,7 @@ public final class HybridAddressSkinnyMapper {
 				.streetName(tokeniserResponse.getStreetName())
 				.locality(tokeniserResponse.getLocality())
 				.townName(tokeniserResponse.getTownName())
+				.townNameUnitAddress(unitAddress.getTownName())
 				.postcode(tokeniserResponse.getPostcode())
 				.easting(!unitAddress.getBngEasting().isEmpty() ? Float.parseFloat(unitAddress.getBngEasting()): null)
 				.northing(!unitAddress.getBngNorthing().isEmpty() ? Float.parseFloat(unitAddress.getBngNorthing()): null)

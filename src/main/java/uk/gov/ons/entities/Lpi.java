@@ -1,7 +1,9 @@
 package uk.gov.ons.entities;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.geo.Point;
 
 import lombok.Data;
@@ -12,9 +14,8 @@ import lombok.NoArgsConstructor;
 @TypeAlias("lpi")
 @EqualsAndHashCode(callSuper=true)
 public @Data class Lpi extends LpiSkinny {
-	
-	@Field(name = "organisation")
-	private String organisationName;
+
+	private String organisation;
 	private String locality;
 	private Short paoEndNumber;
 	private String paoEndSuffix;
@@ -22,10 +23,9 @@ public @Data class Lpi extends LpiSkinny {
 	private Short saoEndNumber;
 	private String saoEndSuffix;
 	private String saoStartSuffix;
-	private String townName;
 	
 	public Lpi(LpiBuilder builder) {
-		this.organisationName = builder.organisationName;
+		this.organisation = builder.organisation;
 		this.locality = builder.locality;
 		this.paoEndNumber = builder.paoEndNumber;
 		this.paoEndSuffix = builder.paoEndSuffix;
@@ -33,7 +33,9 @@ public @Data class Lpi extends LpiSkinny {
 		this.saoEndNumber = builder.saoEndNumber;
 		this.saoEndSuffix = builder.saoEndSuffix;
 		this.saoStartSuffix = builder.saoStartSuffix;
-		this.townName = builder.townName;
+		setTownName(builder.townName);
+		setTownNameUnitAddress(builder.townNameUnitAddress);
+		setOrganisationName(builder.organisationName);
 		setDepartmentName(builder.departmentName);
 		setSubBuildingName(builder.subBuildingName);
 		setBuildingName(builder.buildingName);
@@ -45,16 +47,11 @@ public @Data class Lpi extends LpiSkinny {
 		setEasting(builder.easting);
 		setNorthing(builder.northing);
 		setLanguage(builder.language);
-		setLocation(new Point(super.parseStringToOptionalDouble(builder.latitude).orElse(0.0),
-				super.parseStringToOptionalDouble(builder.longitude).orElse(0.0)));
 		setLatitude(builder.latitude);
 		setLongitude(builder.longitude);
 		setLpiLogicalStatus(builder.lpiLogicalStatus);
-		setMixedNag(builder.mixedNag);
-		setMixedNagStart(builder.mixedNagStart); // keyword
 		setMixedWelshNag(builder.mixedWelshNag);
 		setMixedWelshNagStart(builder.mixedWelshNagStart); // keyword
-		setNagAll(super.getNagAll());
 		setPaoStartNumber(builder.paoStartNumber);
 		setPaoStartSuffix(builder.paoStartSuffix);
 		setParentUprn(builder.parentUprn);
@@ -66,11 +63,36 @@ public @Data class Lpi extends LpiSkinny {
 		setAddressLine1(builder.addressLine1);
 		setAddressLine2(builder.addressLine2);
 		setAddressLine3(builder.addressLine3);
+		setMixedNag(this.getMixedNag());
+		setMixedNagStart(this.getMixedNagStart()); // keyword
+		setNagAll(this.getNagAll());
+		setLocation(new Point(super.parseStringToOptionalDouble(builder.latitude).orElse(0.0),
+				super.parseStringToOptionalDouble(builder.longitude).orElse(0.0)));
+	}
+	
+	public String getMixedNag() {
+		return Stream.of(this.organisation, super.getMixedNag()).filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(", "));
+	}
+	
+	public String getMixedNagStart() {
+		if (!this.getMixedNag().isBlank() && this.getMixedNag().length() > 11) {
+			return this.getMixedNag().substring(0, 11);
+		} else {
+			return this.getMixedNag();
+		}
+	}
+	
+	public String getNagAll() {
+		return Stream.of(this.organisation.toUpperCase(), super.getDepartmentName(), super.getSubBuildingName(),
+				super.getBuildingName(), super.getBuildingNumber() != null ? super.getBuildingNumber().toString() : "",
+				super.getStreetName(), super.getLocality(), super.getTownName(), super.getPostcode())
+				.filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(" "));
 	}
 
 	public static class LpiBuilder {
 		
 		private String organisationName;
+		private String organisation;
 		private String departmentName;
 		private String subBuildingName;
 		private String buildingName;
@@ -78,6 +100,7 @@ public @Data class Lpi extends LpiSkinny {
 		private String streetName;
 		private String locality;
 		private String townName;
+		private String townNameUnitAddress; // The uncapitalised version
 		private String postcode;
 		private String addressBasePostal;
 		private String country;
@@ -87,11 +110,8 @@ public @Data class Lpi extends LpiSkinny {
 		private String latitude;
 		private String longitude;
 		private Byte lpiLogicalStatus;
-		private String mixedNag;
-		private String mixedNagStart; // keyword
 		private String mixedWelshNag;
 		private String mixedWelshNagStart; // keyword
-		private String nagAll;
 		private Short paoStartNumber;
 		private String paoStartSuffix;
 		private Long parentUprn;
@@ -113,6 +133,11 @@ public @Data class Lpi extends LpiSkinny {
 		
 		public LpiBuilder organisationName(String organisationName) {
 			this.organisationName = organisationName;
+			return this;
+		}
+		
+		public LpiBuilder organisation(String organisation) {
+			this.organisation = organisation;
 			return this;
 		}
 		
@@ -148,6 +173,11 @@ public @Data class Lpi extends LpiSkinny {
 		
 		public LpiBuilder townName(String townName) {
 			this.townName = townName;
+			return this;
+		}
+		
+		public LpiBuilder townNameUnitAddress(String townNameUnitAddress) {
+			this.townNameUnitAddress = townNameUnitAddress;
 			return this;
 		}
 		
@@ -196,16 +226,6 @@ public @Data class Lpi extends LpiSkinny {
 			return this;
 		}
 		
-		public LpiBuilder mixedNag(String mixedNag) {
-			this.mixedNag = mixedNag;
-			return this;
-		}
-		
-		public LpiBuilder mixedNagStart(String mixedNagStart) {
-			this.mixedNagStart = mixedNagStart;
-			return this;
-		}
-		
 		public LpiBuilder mixedWelshNag(String mixedWelshNag) {
 			this.mixedWelshNag = mixedWelshNag;
 			return this;
@@ -213,11 +233,6 @@ public @Data class Lpi extends LpiSkinny {
 		
 		public LpiBuilder mixedWelshNagStart(String mixedWelshNagStart) {
 			this.mixedWelshNagStart = mixedWelshNagStart;
-			return this;
-		}
-		
-		public LpiBuilder nagAll(String nagAll) {
-			this.nagAll = nagAll;
 			return this;
 		}
 		

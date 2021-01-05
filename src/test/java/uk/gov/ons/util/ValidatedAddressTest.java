@@ -1,12 +1,10 @@
 package uk.gov.ons.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
 import java.util.Set;

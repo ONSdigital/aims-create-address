@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -20,6 +21,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.WritableResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.annotation.Validated;
@@ -31,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.netty.http.client.HttpClient;
 import uk.gov.ons.entities.Address;
 import uk.gov.ons.entities.AuxAddress;
 import uk.gov.ons.entities.HybridAddressFat;
@@ -66,8 +71,6 @@ public class AddressService {
 
 	@Value("${aims.tokeniser.path}")
 	private String path;
-	
-//	private boolean fatClusterEnabled;
 
 	@Value("gs://${aims.gcp.bucket}/")
 	private String gcsBucket;
@@ -84,9 +87,9 @@ public class AddressService {
 			@Value("${aims.tokeniser.uri}") String tokeniserEndpoint,
 			@Value("${aims.elasticsearch.cluster.fat-enabled}") boolean fatClusterEnabled,
 			WebClient.Builder webClientBuilder) {
-
-		this.webClient = webClientBuilder.baseUrl(tokeniserEndpoint).build();
-//		this.fatClusterEnabled = fatClusterEnabled;
+		
+		this.webClient = webClientBuilder.clientConnector((ClientHttpConnector)new ReactorClientHttpConnector(HttpClient.create()
+				.wiretap(true))).baseUrl(tokeniserEndpoint).build();
 		
 		if (fatClusterEnabled) {
 			GetIndexRequest request = new GetIndexRequest(indexName);
@@ -134,24 +137,21 @@ public class AddressService {
 	}
 
 	public Flux<Address> createAuxAddressesFromCsv(List<ValidatedAddress<AuxAddress>> addresses) {
-
 		return Flux.fromIterable(addresses).parallel().runOn(Schedulers.elastic())
 				.flatMap(validatedAddress -> addressRepository.saveAll(buildAddress(validatedAddress.getAddress())))
 				.sequential().doOnError(ex -> Flux.just("Error: " + ex.getMessage()));
 	}
 
 	public Flux<HybridAddressSkinny> createSkinnyUnitAddressesFromCsv(List<ValidatedAddress<UnitAddress>> addresses) {
-
-			return Flux.fromIterable(addresses).parallel().runOn(Schedulers.elastic())
-					.flatMap(validatedAddress -> hybridAddressSkinnyRepository.saveAll(buildHybridAddressSkinny(validatedAddress.getAddress()))).sequential()
-					.doOnError(ex -> Flux.just("Error: " + ex.getMessage()));
-
+		return Flux.fromIterable(addresses).limitRate(20)
+				.flatMap(validatedAddress -> hybridAddressSkinnyRepository.saveAll(buildHybridAddressSkinny(validatedAddress.getAddress())))
+				.doOnError(ex -> Flux.just("Error: " + ex.getMessage()));
 	}
 	
-	public Flux<HybridAddressFat> createFatUnitAddressesFromCsv(List<ValidatedAddress<UnitAddress>> addresses) {
-				
-		return Flux.fromIterable(addresses).parallel().runOn(Schedulers.elastic())
-				.flatMap(validatedAddress -> hybridAddressFatRepository.saveAll(buildHybridAddressFat(validatedAddress.getAddress()))).sequential()
+	public Flux<HybridAddressFat> createFatUnitAddressesFromCsv(List<ValidatedAddress<UnitAddress>> addresses) {	
+		
+		return Flux.fromIterable(addresses).limitRate(20)
+				.flatMap(validatedAddress -> hybridAddressFatRepository.saveAll(buildHybridAddressFat(validatedAddress.getAddress())))
 				.doOnError(ex -> Flux.just("Error: " + ex.getMessage()));
 	}
 
@@ -186,7 +186,14 @@ public class AddressService {
 
 		log.debug(String.format("Input Address: %s", unitAddress.toString()));
 
-		return webClient.get().uri(path, unitAddress.getAddressAll()).retrieve().bodyToMono(TokeniserResponse.class)
+		return webClient.get().uri(path, unitAddress.getAddressAll())
+				.retrieve()
+				.onStatus(HttpStatus::is4xxClientError, response -> 
+					Mono.error(new CreateAddressRuntimeException("Client error")))
+				.onStatus(HttpStatus::is5xxServerError, response -> 
+					Mono.error(new CreateAddressRuntimeException("Server error")))
+				.bodyToMono(TokeniserResponse.class)
+				.timeout(Duration.ofSeconds(5))
 				.map(tokeniserResponse -> {
 					log.debug(String.format("Tokeniser Response: %s", tokeniserResponse.toString()));
 					HybridAddressSkinny address = HybridAddressSkinnyMapper.from(unitAddress, tokeniserResponse);
@@ -198,7 +205,14 @@ public class AddressService {
 
 		log.debug(String.format("Input Address: %s", unitAddress.toString()));
 
-		return webClient.get().uri(path, unitAddress.getAddressAll()).retrieve().bodyToMono(TokeniserResponse.class)
+		return webClient.get().uri(path, unitAddress.getAddressAll())
+				.retrieve()
+				.onStatus(HttpStatus::is4xxClientError, response -> 
+					Mono.error(new CreateAddressRuntimeException("Client error")))
+				.onStatus(HttpStatus::is5xxServerError, response -> 
+					Mono.error(new CreateAddressRuntimeException("Server error")))
+				.bodyToMono(TokeniserResponse.class)
+				.timeout(Duration.ofSeconds(5))
 				.map(tokeniserResponse -> {
 					log.debug(String.format("Tokeniser Response: %s", tokeniserResponse.toString()));
 					HybridAddressFat address = HybridAddressFatMapper.from(unitAddress, tokeniserResponse);

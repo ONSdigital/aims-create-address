@@ -101,12 +101,23 @@ public @Data class InputAddress {
 		this.estabUprn = estabUprn;
 	}
 
+	/**
+	 * Input fields for CSV or PubSub message that are concatenated and sent to the parser 
+	 * microservice for tokenisation.
+	 * 
+	 * @return concatenated address
+	 */
 	public String getAddressAll() {
 
 		return Stream.of(addressLine1, addressLine2, addressLine3, townName, postcode)
 				.filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(" "));
 	}
 
+	/**
+	 * Returns an InputAddress object as a List of Strings. Used when creating a CSV of invalid addresses.
+	 * 
+	 * @return List of InputAddress values
+	 */
 	public List<String> getRow() {
 		return List.of( this.uprn, this.estabUprn, this.addressType, this.estabType, this.addressLevel,
 				this.abpCode, this.organisationName, this.addressLine1, this.addressLine2, this.addressLine3,
@@ -114,6 +125,11 @@ public @Data class InputAddress {
 
 	}
 
+	/**
+	 * Returns an a List of Strings representing the header values for creating a CSV of invalid addresses.
+	 * 
+	 * @return List of header values
+	 */
 	public List<String> getHeader() {
 		return List.of("UPRN", "ESTAB_UPRN", "ADDRESS_TYPE", "ESTAB_TYPE", "ADDRESS_LEVEL", "ABP_CODE",
 				"ORGANISATION_NAME", "ADDRESS_LINE1", "ADDRESS_LINE2", "ADDRESS_LINE3", "TOWN_NAME", "POSTCODE",

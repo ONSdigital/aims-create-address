@@ -41,6 +41,9 @@ public class CreateAddressController {
 	
 	@Value("${aims.elasticsearch.cluster.fat-enabled}")
 	private boolean fatClusterEnabled;
+	
+	@Value("${aims.display.limit}")
+	private int displayLimit;
 
 	@GetMapping(value = "/")
 	@ResponseStatus(HttpStatus.OK)
@@ -49,6 +52,12 @@ public class CreateAddressController {
 		model.addAttribute("fatClusterEnabled", fatClusterEnabled);
 		
 		return "index";
+	}
+	
+	@GetMapping(value = "/error")
+	@ResponseStatus(HttpStatus.OK)
+	public String error(Model model) {		
+		return "error";
 	}
 
 	@PostMapping(value = "/upload-csv-aux-file")
@@ -78,13 +87,17 @@ public class CreateAddressController {
 				if (invalidAddresses.size() > 0) {
 					model.addAttribute("badAddressCSVPath", String.format("Bad addresss file name: %s. In bucket: %s",
 							addressService.writeBadAddressesCsv(invalidAddresses, BAD_AUX_ADDRESS_FILE_NAME), gcsBucket));
+					model.addAttribute("badAddresses", invalidAddresses.stream().limit(displayLimit).collect(Collectors.toList()));
+					model.addAttribute("badAddressSize", String.format("Total invalid aux addresses: %d", invalidAddresses.size()));
 				}
 
 				List<ValidatedAddress<AuxAddress>> validAddresses = validatedAddresses.stream()
 						.filter(address -> address.isValid()).collect(Collectors.toList());
 
 				if (validAddresses.size() > 0) {
-					model.addAttribute("addresses", validAddresses);
+					model.addAttribute("addresses", validAddresses.stream().limit(displayLimit).collect(Collectors.toList()));
+					model.addAttribute("addressesSize", String.format("Total valid aux addresses: %d", validAddresses.size()));
+
 
 					// Add the good addresses to Elasticsearch
 					addressService.createAuxAddressesFromCsv(validAddresses).doOnNext(output -> {
@@ -99,13 +112,12 @@ public class CreateAddressController {
 					}).subscribe();
 				}
 
-				// save address list on model
-				model.addAttribute("badAddresses", invalidAddresses);
 				model.addAttribute("status", true);
 			} catch (Exception ex) {
 				model.addAttribute("message",
 						String.format("An error occurred while processing the CSV file: %s", ex.getMessage()));
 				model.addAttribute("status", false);
+				return "error";
 			}
 		}
 
@@ -118,7 +130,6 @@ public class CreateAddressController {
 		/*
 		 * TODO: Reactify the web page to stream the results of the add operation.
 		 */
-
 		// validate file
 		if (file.isEmpty()) {
 			model.addAttribute("message", "Select a CSV file to upload and an Index to load to.");
@@ -129,6 +140,7 @@ public class CreateAddressController {
 
 				CsvToBean<UnitAddress> csvToBean = new CsvToBeanBuilder<UnitAddress>(reader).withType(UnitAddress.class)
 						.withIgnoreLeadingWhiteSpace(true)
+						.withIgnoreEmptyLine(true)
 						.withSeparator('|').build();
 
 				List<ValidatedAddress<UnitAddress>> validatedAddresses = csvToBean.parse().stream()
@@ -140,13 +152,16 @@ public class CreateAddressController {
 				if (invalidAddresses.size() > 0) {
 					model.addAttribute("badAddressCSVPath", String.format("Bad addresss file name: %s. In bucket: %s",
 							addressService.writeBadAddressesCsv(invalidAddresses, BAD_UNIT_ADDRESS_FILE_NAME), gcsBucket));
+					model.addAttribute("badAddresses", invalidAddresses.stream().limit(displayLimit).collect(Collectors.toList()));
+					model.addAttribute("badAddressSize", String.format("Total invalid unit addresses: %d", invalidAddresses.size()));
 				}
 
 				List<ValidatedAddress<UnitAddress>> validAddresses = validatedAddresses.stream()
 						.filter(address -> address.isValid()).collect(Collectors.toList());
 
 				if (validAddresses.size() > 0) {
-					model.addAttribute("addresses", validAddresses);
+					model.addAttribute("addresses", validAddresses.stream().limit(displayLimit).collect(Collectors.toList()));
+					model.addAttribute("addressesSize", String.format("Total valid unit addresses: %d", validAddresses.size()));
 
 					/* Add the good addresses to Elasticsearch
 					 * This is very basic at the moment and just returns to the view the addresses
@@ -164,14 +179,13 @@ public class CreateAddressController {
 						}).subscribe();
 					}
 				}
-
-				// save address list on model
-				model.addAttribute("badAddresses", invalidAddresses);
+				
 				model.addAttribute("status", true);
 			} catch (Exception ex) {
 				model.addAttribute("message",
 						String.format("An error occurred while processing the CSV file: %s", ex.getMessage()));
 				model.addAttribute("status", false);
+				return "error";
 			}
 		}
 

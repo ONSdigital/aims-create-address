@@ -219,7 +219,9 @@ class AddressServiceTest {
 
 	private Address address6 = new Address(uprn6, postcodeIn5, postcodeOut5, classificationCode3, censusAddressType,
 			censusEstabType, censusEstabUprn, countryCode2, postcode5, tokens6);
-
+	
+//	private Lpi fatLpi1 = new Lpi.LpiBuilder().
+	
 	public AddressServiceTest() throws IOException {
 
 		elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.3.1");
@@ -568,5 +570,25 @@ class AddressServiceTest {
 				.readValue(messages.get(0).getPubsubMessage().getData().toByteArray(), Message.class);
 
 		assertEquals(expectedMsg, actualMessage);
+	}
+	
+	@Test
+	@Order(value = 11)
+	public void testCreateUnitAddressesFromCsv() throws Exception {
+			
+		//TODO: Finish this unit test
+		
+//		Reader reader = new BufferedReader(new FileReader(new File("src/test/resources/unit-addresses-test.csv")));
+//
+//		CsvToBean<UnitAddress> csvToBean = new CsvToBeanBuilder<UnitAddress>(reader).withType(UnitAddress.class)
+//				.withIgnoreLeadingWhiteSpace(true)
+//				.withIgnoreEmptyLine(true)
+//				.withSeparator('|').build();
+//
+//		List<ValidatedAddress<UnitAddress>> validatedAddresses = csvToBean.parse().stream()
+//				.map(address -> new ValidatedAddress<UnitAddress>(address)).collect(Collectors.toList());
+		
+		assertTrue(true);
+		
 	}
 }
