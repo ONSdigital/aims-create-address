@@ -43,18 +43,18 @@ management:
       enabled: true
 logging:
   level:
-    root: info
+    root: INFO
     uk:
       gov:
-        ons: info
+        ons: INFO
     org:
       springframework:
         data:
           elasticsearch:
             client:
-              WIRE: trace
+              WIRE: INFO
     reactor:
-      netty: info
+      netty: INFO
 aims:
   pubsub:
     subscription: new-address-subscription
