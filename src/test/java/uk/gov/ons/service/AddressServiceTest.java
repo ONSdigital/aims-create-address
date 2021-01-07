@@ -224,7 +224,7 @@ class AddressServiceTest {
 	
 	public AddressServiceTest() throws IOException {
 
-		elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.3.1");
+		elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.9.3");
 		elastic.start();
 
 		System.setProperty("spring.elasticsearch.rest.uris",
