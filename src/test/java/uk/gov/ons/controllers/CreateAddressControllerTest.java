@@ -36,7 +36,7 @@ public class CreateAddressControllerTest {
 		 *  Service is properly tested in AddressServiceTest.
 		 *  ES and MockWebServer required to stop exceptions.
 		 */
-		elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.3.1");
+		elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.9.3");
 		elastic.start();
 
 		System.setProperty("spring.elasticsearch.rest.uris",
@@ -70,13 +70,13 @@ public class CreateAddressControllerTest {
 	}
 	
 	@Test 
-	void testUploadAddresses() {
+	void testUploadAuxAddresses() {
 		
 		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
-		multipartBodyBuilder.part("file", new ClassPathResource("test.csv")).contentType(MediaType.MULTIPART_FORM_DATA);
+		multipartBodyBuilder.part("file", new ClassPathResource("aux-addresses-test.csv")).contentType(MediaType.MULTIPART_FORM_DATA);
 				
-		// Returns page showing addresses that were attempted to load to ES. No indication if it was successful or not.
-		client.post().uri("/upload-csv-file")
+		// Returns page showing addresses that were attempted to load to ES and bad addresses.
+		client.post().uri("/upload-csv-aux-file")
 			.contentType(MediaType.MULTIPART_FORM_DATA)
 			.body(BodyInserters.fromMultipartData(multipartBodyBuilder.build()))
 			.exchange()
@@ -88,4 +88,26 @@ public class CreateAddressControllerTest {
 				assertTrue(response.toString().contains("1234567891012"));			
 			});
 	}	
+	
+	@Test 
+	void testUploadUnitAddresses() {
+		
+		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
+		multipartBodyBuilder.part("file", new ClassPathResource("unit-addresses-test.csv")).contentType(MediaType.MULTIPART_FORM_DATA);
+				
+		// Returns page showing addresses that were attempted to load to ES and bad addresses.
+		client.post().uri("/upload-csv-unit-file")
+			.contentType(MediaType.MULTIPART_FORM_DATA)
+			.body(BodyInserters.fromMultipartData(multipartBodyBuilder.build()))
+			.exchange()
+			.expectStatus().isOk()
+			.expectBody(String.class)
+			.consumeWith(response -> {
+				// Does the response contain the 2 UPRN values uploaded?
+				assertTrue(response.toString().contains("8881000000001"));
+				assertTrue(response.toString().contains("8881000008109"));			
+			});
+	}	
+	
+	
 }

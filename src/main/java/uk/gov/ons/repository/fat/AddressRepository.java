@@ -1,4 +1,4 @@
-package uk.gov.ons.repository;
+package uk.gov.ons.repository.fat;
 
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;

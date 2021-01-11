@@ -1,10 +1,8 @@
 package uk.gov.ons.entities;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-
-import uk.gov.ons.entities.Tokens.TokensBuilder;
 
 class TokensTest {
 	

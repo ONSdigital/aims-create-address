@@ -4,6 +4,7 @@ import uk.gov.ons.entities.Address;
 import uk.gov.ons.entities.InputAddress;
 import uk.gov.ons.entities.Tokens;
 import uk.gov.ons.json.TokeniserResponse;
+import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 
 public final class AddressMapper {
 	
@@ -36,20 +37,29 @@ public final class AddressMapper {
 				.addressLine3(inputAddress.getAddressLine3())
 				.build();
 		
-		Address.CountryCode countryCode;
+		CountryCode countryCode;
 		
 		switch (inputAddress.getRegion().charAt(0)) {
 		case 'E':
-			countryCode = Address.CountryCode.E;
+			countryCode = CountryCode.E;
 			break;
 		case 'W':
-			countryCode = Address.CountryCode.W;
+			countryCode = CountryCode.W;
 			break;
 		case 'N':
-			countryCode = Address.CountryCode.N;
+			countryCode = CountryCode.N;
 			break;
 		case 'S':
-			countryCode = Address.CountryCode.W;
+			countryCode = CountryCode.W;
+			break;
+		case 'L':
+			countryCode = CountryCode.L;
+			break;
+		case 'M':
+			countryCode = CountryCode.M;
+			break;
+		case 'J':
+			countryCode = CountryCode.J;
 			break;
 		default:
 			countryCode = null;	

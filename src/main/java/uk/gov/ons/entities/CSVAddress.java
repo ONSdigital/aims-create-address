@@ -1,35 +1,44 @@
 package uk.gov.ons.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+
 import com.opencsv.bean.CsvBindByName;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(callSuper = true)
 public @Data class CSVAddress extends InputAddress {
-	
+
 	@CsvBindByName
+	@NotBlank(message = "OA is mandatory")
 	private String oa;
 	@CsvBindByName
+	@NotBlank(message = "LSOA is mandatory")
 	private String lsoa;
 	@CsvBindByName
+	@NotBlank(message = "MSOA is mandatory")
 	private String msoa;
 	@CsvBindByName
+	@NotBlank(message = "LAD is mandatory")
 	private String lad;
-	@CsvBindByName(column = "htc_willingness")
-	private String htcWillingness;
-	@CsvBindByName(column = "htc_digital")
-	private String htcDigital;
-	@CsvBindByName(column = "treatment_code")
-	private String treatmentCode;
-	@CsvBindByName(column = "feildcoordinator_id")
-	private String fieldCoordinatorId;
-	@CsvBindByName(column = "fieldofficer_id")
-	private String fieldOfficerId;
-	@CsvBindByName(column = "ce_expected_capacity")
-	private String ceExpectedCapacity;
-	@CsvBindByName(column = "ce_secure")
-	private String ceSecure;
-	@CsvBindByName(column = "print_batch")
-	private String printBatch;
+	
+	@Override
+	public List<String> getRow() {
+		
+		List<String> contents = new ArrayList<String>(super.getRow()); 
+		contents.addAll(List.of( this.oa, this.lsoa, this.msoa, this.lad ));
+
+		return contents;
+	}
+	
+	@Override
+	public List<String> getHeader() {
+		List<String> header = new ArrayList<String>(super.getHeader()); 
+		header.addAll(List.of("OA", "LSOA", "MSOA", "LAD"));
+		return header;
+	}
 }

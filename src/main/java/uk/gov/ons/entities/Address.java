@@ -6,8 +6,10 @@ import org.springframework.data.elasticsearch.annotations.Document;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 
-@Document(indexName = "#{@config.indexName}")
+
+@Document(indexName = "#{@config.auxIndexName}")
 @TypeAlias("address")
 @AllArgsConstructor
 public @Data class Address {
@@ -23,8 +25,4 @@ public @Data class Address {
 	private CountryCode countryCode;
 	private String postcode;
 	private Tokens tokens;
-
-	public enum CountryCode {
-		E, W, N, S
-	}
 }

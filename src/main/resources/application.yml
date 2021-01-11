@@ -1,3 +1,11 @@
+server:
+  error:
+    whitelabel:
+      enabled: false
+  tomcat:
+    connection-timeout: 300s
+  netty:
+    connection-timeout: 300s
 spring:
   application:
     name: create-address
@@ -12,6 +20,12 @@ spring:
   cloud:
     gcp:
       project-id: YOUR_GCP_PROJECT_ID_HERE
+  servlet:
+    multipart:
+      max-file-size: 100MB
+  thymeleaf:
+    reactive:
+      max-chunk-size: 8192
 management:
   endpoints:
     web:
@@ -36,13 +50,31 @@ logging:
     org:
       springframework:
         data:
-          elasticsearch: INFO
+          elasticsearch:
+            client:
+              WIRE: INFO
+    reactor:
+      netty: INFO
 aims:
   pubsub:
     subscription: new-address-subscription
+  gcp:
+    bucket: YOUR_GCP_BUCKET_ID_HERE
   elasticsearch:
+    cluster:
+      fat-enabled: true
     index:
-      name: new-addresses
+      aux:
+        name: new-addresses
+      fat:
+        name: index_full_nohist_current
+      skinny:
+        name: index_skinny_nohist_current
+    client:
+      socket-timeout: 300000
+      connect-timeout: 300000
   tokeniser:
     uri: http://localhost:8081
     path: /tokens?address={address}
+  display:
+    limit: 5
