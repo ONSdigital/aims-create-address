@@ -108,7 +108,6 @@ public @Data class InputAddress {
 	 * @return concatenated address
 	 */
 	public String getAddressAll() {
-
 		return Stream.of(addressLine1, addressLine2, addressLine3, townName, postcode)
 				.filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(" "));
 	}

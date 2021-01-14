@@ -11,6 +11,7 @@ public final class HybridAddressSkinnyMapper {
 	public static HybridAddressSkinny from(UnitAddress unitAddress, TokeniserResponse tokeniserResponse) throws NumberFormatException
 	{
 		LpiSkinny lpi = new LpiSkinny.LpiSkinnyBuilder()
+				.organisation(unitAddress.getOrganisationName())
 				.organisationName(tokeniserResponse.getOrganisationName())
 				.departmentName(tokeniserResponse.getDepartmentName())
 				.subBuildingName(tokeniserResponse.getSubBuildingName())

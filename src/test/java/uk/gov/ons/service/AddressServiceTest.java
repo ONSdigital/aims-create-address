@@ -7,16 +7,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -37,6 +43,8 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.mockwebserver.Dispatcher;
@@ -48,11 +56,18 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import uk.gov.ons.entities.Address;
 import uk.gov.ons.entities.AuxAddress;
+import uk.gov.ons.entities.HybridAddressFat;
+import uk.gov.ons.entities.HybridAddressSkinny;
 import uk.gov.ons.entities.InputAddress;
+import uk.gov.ons.entities.Lpi;
+import uk.gov.ons.entities.LpiSkinny;
 import uk.gov.ons.entities.Message;
 import uk.gov.ons.entities.Tokens;
+import uk.gov.ons.entities.UnitAddress;
 import uk.gov.ons.json.TokeniserResponse;
 import uk.gov.ons.repository.fat.AddressRepository;
+import uk.gov.ons.repository.fat.HybridAddressFatRepository;
+import uk.gov.ons.repository.skinny.HybridAddressSkinnyRepository;
 import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 import uk.gov.ons.util.ValidatedAddress;
 
@@ -69,6 +84,10 @@ class AddressServiceTest {
 
 	@Autowired
 	private AddressRepository repository;
+	@Autowired
+	private HybridAddressFatRepository fatRepository;
+	@Autowired
+	private HybridAddressSkinnyRepository skinnyRepository;
 
 	private final ElasticsearchContainer elastic;
 
@@ -220,7 +239,18 @@ class AddressServiceTest {
 	private Address address6 = new Address(uprn6, postcodeIn5, postcodeOut5, classificationCode3, censusAddressType,
 			censusEstabType, censusEstabUprn, countryCode2, postcode5, tokens6);
 	
-//	private Lpi fatLpi1 = new Lpi.LpiBuilder().
+	private List<Address> addresses = Arrays.asList(address2, address3);
+	private List<ValidatedAddress<UnitAddress>> validatedAddresses;
+	private TokeniserResponse mockTokeniserUnitResponse1;
+	private TokeniserResponse mockTokeniserUnitResponse2;
+	private Lpi fatLpi1;
+	private Lpi fatLpi2;
+	private LpiSkinny skinnyLpi1;
+	private LpiSkinny skinnyLpi2;
+	private HybridAddressFat hybridAddressFat1;
+	private HybridAddressFat hybridAddressFat2;
+	private HybridAddressSkinny hybridAddressSkinny1;
+	private HybridAddressSkinny hybridAddressSkinny2;
 	
 	public AddressServiceTest() throws IOException {
 
@@ -238,8 +268,218 @@ class AddressServiceTest {
 		System.setProperty("aims.tokeniser.uri", String.format("http://localhost:%s", mockBackEnd.getPort()));
 	}
 
-	private List<Address> addresses = Arrays.asList(address2, address3);
+	@BeforeAll
+	public void beforeAll() throws Exception {
+		
+		/*
+		 * This test data is used for the skinny and fat unit-address tests
+		 */
 
+		Reader reader = new BufferedReader(new FileReader(new File("src/test/resources/unit-addresses-test.csv")));
+
+		CsvToBean<UnitAddress> csvToBean = new CsvToBeanBuilder<UnitAddress>(reader).withType(UnitAddress.class)
+				.withIgnoreLeadingWhiteSpace(true).withIgnoreEmptyLine(true).withSeparator('|').build();
+
+		validatedAddresses = csvToBean.parse().stream().map(address -> new ValidatedAddress<UnitAddress>(address))
+				.collect(Collectors.toList());
+
+		mockTokeniserUnitResponse1 = new TokeniserResponse();
+		mockTokeniserUnitResponse1.setOrganisationName("UNIVERSITY OF BIRMINGHAM");
+		mockTokeniserUnitResponse1.setDepartmentName("");
+		mockTokeniserUnitResponse1.setSubBuildingName("ROOM 5 BLOCK 6 FLAT 49");
+		mockTokeniserUnitResponse1.setBuildingName("MAPLE BANK THE VALE VILLAGE");
+		mockTokeniserUnitResponse1.setBuildingNumber("");
+		mockTokeniserUnitResponse1.setPaoStartNumber("");
+		mockTokeniserUnitResponse1.setPaoStartSuffix("");
+		mockTokeniserUnitResponse1.setPaoEndNumber("");
+		mockTokeniserUnitResponse1.setPaoEndSuffix("");
+		mockTokeniserUnitResponse1.setSaoStartNumber("5");
+		mockTokeniserUnitResponse1.setSaoStartSuffix("");
+		mockTokeniserUnitResponse1.setSaoEndNumber("");
+		mockTokeniserUnitResponse1.setSaoEndSuffix("");
+		mockTokeniserUnitResponse1.setStreetName("CHURCH ROAD");
+		mockTokeniserUnitResponse1.setLocality("");
+		mockTokeniserUnitResponse1.setTownName("BIRMINGHAM");
+		mockTokeniserUnitResponse1.setPostcode("B15 3TE");
+		mockTokeniserUnitResponse1.setPostcodeIn("3TE");
+		mockTokeniserUnitResponse1.setPostcodeOut("B15");
+
+		mockTokeniserUnitResponse2 = new TokeniserResponse();
+		mockTokeniserUnitResponse2.setOrganisationName("UNIVERSITY OF CENTRAL LANCASHIRE");
+		mockTokeniserUnitResponse2.setDepartmentName("");
+		mockTokeniserUnitResponse2.setSubBuildingName("ROOM 1 FLAT 02");
+		mockTokeniserUnitResponse2.setBuildingName("DERWENT HALL PRESTON CAMPUS");
+		mockTokeniserUnitResponse2.setBuildingNumber("5");
+		mockTokeniserUnitResponse2.setPaoStartNumber("5");
+		mockTokeniserUnitResponse2.setPaoStartSuffix("");
+		mockTokeniserUnitResponse2.setPaoEndNumber("");
+		mockTokeniserUnitResponse2.setPaoEndSuffix("");
+		mockTokeniserUnitResponse2.setSaoStartNumber("1");
+		mockTokeniserUnitResponse2.setSaoStartSuffix("");
+		mockTokeniserUnitResponse2.setSaoEndNumber("");
+		mockTokeniserUnitResponse2.setSaoEndSuffix("");
+		mockTokeniserUnitResponse2.setStreetName("VICTORIA STREET");
+		mockTokeniserUnitResponse2.setLocality("");
+		mockTokeniserUnitResponse2.setTownName("PRESTON");
+		mockTokeniserUnitResponse2.setPostcode("PR1 7QR");
+		mockTokeniserUnitResponse2.setPostcodeIn("7QR");
+		mockTokeniserUnitResponse2.setPostcodeOut("PR1");
+
+		fatLpi1 = new Lpi.LpiBuilder().organisationName(mockTokeniserUnitResponse1.getOrganisationName())
+				.organisation(validatedAddresses.get(0).getAddress().getOrganisationName()).departmentName(mockTokeniserUnitResponse1.getDepartmentName())
+				.subBuildingName(mockTokeniserUnitResponse1.getSubBuildingName())
+				.buildingName(mockTokeniserUnitResponse1.getBuildingName())
+				.buildingNumber(!mockTokeniserUnitResponse1.getBuildingNumber().isEmpty()
+						? Short.valueOf(mockTokeniserUnitResponse1.getBuildingNumber())
+						: null)
+				.streetName(mockTokeniserUnitResponse1.getStreetName()).locality(mockTokeniserUnitResponse1.getLocality())
+				.townName(mockTokeniserUnitResponse1.getTownName())
+				.townNameUnitAddress(validatedAddresses.get(0).getAddress().getTownName())
+				.postcode(mockTokeniserUnitResponse1.getPostcode())
+				.easting(Float.valueOf(validatedAddresses.get(0).getAddress().getBngEasting()))
+				.northing(Float.valueOf(validatedAddresses.get(0).getAddress().getBngNorthing()))
+				.latitude(validatedAddresses.get(0).getAddress().getLatitude())
+				.longitude(validatedAddresses.get(0).getAddress().getLongitude())
+				.paoStartNumber(!mockTokeniserUnitResponse1.getPaoStartNumber().isEmpty()
+						? Short.valueOf(mockTokeniserUnitResponse1.getPaoStartNumber())
+						: null)
+				.paoStartSuffix(mockTokeniserUnitResponse1.getPaoStartSuffix())
+				.postcodeLocator(mockTokeniserUnitResponse1.getPostcode())
+				.saoStartNumber(Short.valueOf(mockTokeniserUnitResponse1.getSaoStartNumber()))
+				.streetDescriptor(mockTokeniserUnitResponse1.getStreetName())
+				.uprn(Long.valueOf(validatedAddresses.get(0).getAddress().getUprn()))
+				.addressLine1(validatedAddresses.get(0).getAddress().getAddressLine1())
+				.addressLine2(validatedAddresses.get(0).getAddress().getAddressLine2())
+				.addressLine3(validatedAddresses.get(0).getAddress().getAddressLine3())
+				.paoEndNumber(!mockTokeniserUnitResponse1.getPaoEndNumber().isEmpty()
+						? Short.parseShort(mockTokeniserUnitResponse1.getPaoEndNumber())
+						: null)
+				.paoEndSuffix(mockTokeniserUnitResponse1.getPaoEndSuffix())
+				.saoEndNumber(!mockTokeniserUnitResponse1.getSaoEndNumber().isEmpty()
+						? Short.parseShort(mockTokeniserUnitResponse1.getSaoEndNumber())
+						: null)
+				.saoEndSuffix(mockTokeniserUnitResponse1.getSaoEndSuffix())
+				.saoStartSuffix(mockTokeniserUnitResponse1.getSaoStartSuffix()).build();
+
+		fatLpi2 = new Lpi.LpiBuilder().organisationName(mockTokeniserUnitResponse2.getOrganisationName())
+				.organisation(validatedAddresses.get(1).getAddress().getOrganisationName()).departmentName(mockTokeniserUnitResponse2.getDepartmentName())
+				.subBuildingName(mockTokeniserUnitResponse2.getSubBuildingName())
+				.buildingName(mockTokeniserUnitResponse2.getBuildingName())
+				.buildingNumber(Short.valueOf(mockTokeniserUnitResponse2.getBuildingNumber()))
+				.streetName(mockTokeniserUnitResponse2.getStreetName()).locality(mockTokeniserUnitResponse2.getLocality())
+				.townName(mockTokeniserUnitResponse2.getTownName())
+				.townNameUnitAddress(validatedAddresses.get(1).getAddress().getTownName())
+				.postcode(mockTokeniserUnitResponse2.getPostcode())
+				.easting(Float.valueOf(validatedAddresses.get(1).getAddress().getBngEasting()))
+				.northing(Float.valueOf(validatedAddresses.get(1).getAddress().getBngNorthing()))
+				.latitude(validatedAddresses.get(1).getAddress().getLatitude())
+				.longitude(validatedAddresses.get(1).getAddress().getLongitude())
+				.paoStartNumber(Short.valueOf(mockTokeniserUnitResponse2.getPaoStartNumber()))
+				.paoStartSuffix(mockTokeniserUnitResponse2.getPaoStartSuffix())
+				.postcodeLocator(mockTokeniserUnitResponse2.getPostcode())
+				.saoStartNumber(Short.valueOf(mockTokeniserUnitResponse2.getSaoStartNumber()))
+				.streetDescriptor(mockTokeniserUnitResponse2.getStreetName())
+				.uprn(Long.valueOf(validatedAddresses.get(1).getAddress().getUprn()))
+				.addressLine1(validatedAddresses.get(1).getAddress().getAddressLine1())
+				.addressLine2(validatedAddresses.get(1).getAddress().getAddressLine2())
+				.addressLine3(validatedAddresses.get(1).getAddress().getAddressLine3())
+				.paoEndNumber(!mockTokeniserUnitResponse2.getPaoEndNumber().isEmpty()
+						? Short.parseShort(mockTokeniserUnitResponse2.getPaoEndNumber())
+						: null)
+				.paoEndSuffix(mockTokeniserUnitResponse2.getPaoEndSuffix())
+				.saoEndNumber(!mockTokeniserUnitResponse2.getSaoEndNumber().isEmpty()
+						? Short.parseShort(mockTokeniserUnitResponse2.getSaoEndNumber())
+						: null)
+				.saoEndSuffix(mockTokeniserUnitResponse2.getSaoEndSuffix())
+				.saoStartSuffix(mockTokeniserUnitResponse2.getSaoStartSuffix()).build();
+
+		hybridAddressFat1 = new HybridAddressFat(Long.valueOf(validatedAddresses.get(0).getAddress().getUprn()),
+				fatLpi1, validatedAddresses.get(0).getAddress().getAbpCode(),
+				validatedAddresses.get(0).getAddress().getAddressType(),
+				validatedAddresses.get(0).getAddress().getEstabType(),
+				validatedAddresses.get(0).getAddress().getPostcode(), CountryCode.E,
+				mockTokeniserUnitResponse1.getTownName());
+
+		hybridAddressFat2 = new HybridAddressFat(Long.valueOf(validatedAddresses.get(1).getAddress().getUprn()),
+				fatLpi2, validatedAddresses.get(1).getAddress().getAbpCode(),
+				validatedAddresses.get(1).getAddress().getAddressType(),
+				validatedAddresses.get(1).getAddress().getEstabType(),
+				validatedAddresses.get(1).getAddress().getPostcode(), CountryCode.E,
+				mockTokeniserUnitResponse2.getTownName());
+		
+		skinnyLpi1 = new LpiSkinny.LpiSkinnyBuilder()
+				.organisation(validatedAddresses.get(0).getAddress().getOrganisationName())
+				.organisationName(mockTokeniserUnitResponse1.getOrganisationName())
+				.departmentName(mockTokeniserUnitResponse1.getDepartmentName())
+				.subBuildingName(mockTokeniserUnitResponse1.getSubBuildingName())
+				.buildingName(mockTokeniserUnitResponse1.getBuildingName())
+				.buildingNumber(!mockTokeniserUnitResponse1.getBuildingNumber().isEmpty()
+						? Short.valueOf(mockTokeniserUnitResponse1.getBuildingNumber())
+						: null)
+				.streetName(mockTokeniserUnitResponse1.getStreetName())
+				.locality(mockTokeniserUnitResponse1.getLocality())
+				.townName(mockTokeniserUnitResponse1.getTownName())
+				.townNameUnitAddress(validatedAddresses.get(0).getAddress().getTownName())
+				.postcode(mockTokeniserUnitResponse1.getPostcode())
+				.easting(Float.valueOf(validatedAddresses.get(0).getAddress().getBngEasting()))
+				.northing(Float.valueOf(validatedAddresses.get(0).getAddress().getBngNorthing()))
+				.latitude(validatedAddresses.get(0).getAddress().getLatitude())
+				.longitude(validatedAddresses.get(0).getAddress().getLongitude())
+				.paoStartNumber(!mockTokeniserUnitResponse1.getPaoStartNumber().isEmpty()
+						? Short.valueOf(mockTokeniserUnitResponse1.getPaoStartNumber())
+						: null)
+				.paoStartSuffix(mockTokeniserUnitResponse1.getPaoStartSuffix())
+				.postcodeLocator(mockTokeniserUnitResponse1.getPostcode())
+				.saoStartNumber(Short.valueOf(mockTokeniserUnitResponse1.getSaoStartNumber()))
+				.streetDescriptor(mockTokeniserUnitResponse1.getStreetName())
+				.uprn(Long.valueOf(validatedAddresses.get(0).getAddress().getUprn()))
+				.addressLine1(validatedAddresses.get(0).getAddress().getAddressLine1())
+				.addressLine2(validatedAddresses.get(0).getAddress().getAddressLine2())
+				.addressLine3(validatedAddresses.get(0).getAddress().getAddressLine3())
+				.build();
+
+		skinnyLpi2 = new LpiSkinny.LpiSkinnyBuilder()
+				.organisation(validatedAddresses.get(1).getAddress().getOrganisationName())
+				.organisationName(mockTokeniserUnitResponse2.getOrganisationName())
+				.departmentName(mockTokeniserUnitResponse2.getDepartmentName())
+				.subBuildingName(mockTokeniserUnitResponse2.getSubBuildingName())
+				.buildingName(mockTokeniserUnitResponse2.getBuildingName())
+				.buildingNumber(Short.valueOf(mockTokeniserUnitResponse2.getBuildingNumber()))
+				.streetName(mockTokeniserUnitResponse2.getStreetName())
+				.locality(mockTokeniserUnitResponse2.getLocality())
+				.townName(mockTokeniserUnitResponse2.getTownName())
+				.townNameUnitAddress(validatedAddresses.get(1).getAddress().getTownName())
+				.postcode(mockTokeniserUnitResponse2.getPostcode())
+				.easting(Float.valueOf(validatedAddresses.get(1).getAddress().getBngEasting()))
+				.northing(Float.valueOf(validatedAddresses.get(1).getAddress().getBngNorthing()))
+				.latitude(validatedAddresses.get(1).getAddress().getLatitude())
+				.longitude(validatedAddresses.get(1).getAddress().getLongitude())
+				.paoStartNumber(Short.valueOf(mockTokeniserUnitResponse2.getPaoStartNumber()))
+				.paoStartSuffix(mockTokeniserUnitResponse2.getPaoStartSuffix())
+				.postcodeLocator(mockTokeniserUnitResponse2.getPostcode())
+				.saoStartNumber(Short.valueOf(mockTokeniserUnitResponse2.getSaoStartNumber()))
+				.streetDescriptor(mockTokeniserUnitResponse2.getStreetName())
+				.uprn(Long.valueOf(validatedAddresses.get(1).getAddress().getUprn()))
+				.addressLine1(validatedAddresses.get(1).getAddress().getAddressLine1())
+				.addressLine2(validatedAddresses.get(1).getAddress().getAddressLine2())
+				.addressLine3(validatedAddresses.get(1).getAddress().getAddressLine3())
+				.build();
+		
+		hybridAddressSkinny1 = new HybridAddressSkinny(Long.valueOf(validatedAddresses.get(0).getAddress().getUprn()),
+				skinnyLpi1, validatedAddresses.get(0).getAddress().getAbpCode(),
+				validatedAddresses.get(0).getAddress().getAddressType(),
+				validatedAddresses.get(0).getAddress().getEstabType(),
+				validatedAddresses.get(0).getAddress().getPostcode(), CountryCode.E,
+				mockTokeniserUnitResponse1.getTownName());
+
+		hybridAddressSkinny2 = new HybridAddressSkinny(Long.valueOf(validatedAddresses.get(1).getAddress().getUprn()),
+				skinnyLpi2, validatedAddresses.get(1).getAddress().getAbpCode(),
+				validatedAddresses.get(1).getAddress().getAddressType(),
+				validatedAddresses.get(1).getAddress().getEstabType(),
+				validatedAddresses.get(1).getAddress().getPostcode(), CountryCode.E,
+				mockTokeniserUnitResponse2.getTownName());
+	}
+	
 	@AfterAll
 	public void tear() throws IOException {
 
@@ -574,21 +814,114 @@ class AddressServiceTest {
 	
 	@Test
 	@Order(value = 11)
-	public void testCreateUnitAddressesFromCsv() throws Exception {
-			
-		//TODO: Finish this unit test
-		
-//		Reader reader = new BufferedReader(new FileReader(new File("src/test/resources/unit-addresses-test.csv")));
-//
-//		CsvToBean<UnitAddress> csvToBean = new CsvToBeanBuilder<UnitAddress>(reader).withType(UnitAddress.class)
-//				.withIgnoreLeadingWhiteSpace(true)
-//				.withIgnoreEmptyLine(true)
-//				.withSeparator('|').build();
-//
-//		List<ValidatedAddress<UnitAddress>> validatedAddresses = csvToBean.parse().stream()
-//				.map(address -> new ValidatedAddress<UnitAddress>(address)).collect(Collectors.toList());
-		
-		assertTrue(true);
-		
+	public void testCreateFatUnitAddressesFromCsv() {
+
+		Dispatcher mDispatcher = new Dispatcher() {
+			@Override
+			public MockResponse dispatch(RecordedRequest request) {
+
+				if (request.getPath().contains("Birmingham")) {
+					try {
+						return new MockResponse().setBody(new ObjectMapper().writeValueAsString(mockTokeniserUnitResponse1))
+								.addHeader("Content-Type", "application/json");
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
+				}
+				if (request.getPath().contains("Preston")) {
+					try {
+						return new MockResponse().setBody(new ObjectMapper().writeValueAsString(mockTokeniserUnitResponse2))
+								.addHeader("Content-Type", "application/json");
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
+				}
+				return new MockResponse().setResponseCode(404);
+			}
+		};
+
+		mockBackEnd.setDispatcher(mDispatcher);
+
+		Flux<HybridAddressFat> addresses = addressService.createFatUnitAddressesFromCsv(validatedAddresses);
+
+		List<HybridAddressFat> expectedAddresses = new ArrayList<>(List.of(hybridAddressFat1, hybridAddressFat2));
+		expectedAddresses.forEach(address -> log.info(address.toString()));
+
+		StepVerifier.create(addresses).recordWith(ArrayList::new).thenConsumeWhile(x -> true)
+				.consumeRecordedWith(actualAddresses -> {
+					actualAddresses.forEach(address -> log.info(address.toString()));
+					assertEquals(2, actualAddresses.size());
+					assertTrue(actualAddresses.containsAll(expectedAddresses));
+
+				}).verifyComplete();
+
+	}
+
+	@Test
+	@Order(value = 12)
+	public void testCreateSkinnyUnitAddressesFromCsv() {
+
+		Dispatcher mDispatcher = new Dispatcher() {
+			@Override
+			public MockResponse dispatch(RecordedRequest request) {
+
+				if (request.getPath().contains("Birmingham")) {
+					try {
+						return new MockResponse().setBody(new ObjectMapper().writeValueAsString(mockTokeniserUnitResponse1))
+								.addHeader("Content-Type", "application/json");
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
+				}
+				if (request.getPath().contains("Preston")) {
+					try {
+						return new MockResponse().setBody(new ObjectMapper().writeValueAsString(mockTokeniserUnitResponse2))
+								.addHeader("Content-Type", "application/json");
+					} catch (JsonProcessingException e) {
+						e.printStackTrace();
+					}
+				}
+				return new MockResponse().setResponseCode(404);
+			}
+		};
+
+		mockBackEnd.setDispatcher(mDispatcher);
+
+		Flux<HybridAddressSkinny> addresses = addressService.createSkinnyUnitAddressesFromCsv(validatedAddresses);
+
+		List<HybridAddressSkinny> expectedAddresses = new ArrayList<>(List.of(hybridAddressSkinny1, hybridAddressSkinny2));
+		expectedAddresses.forEach(address -> log.info(address.toString()));
+
+		StepVerifier.create(addresses).recordWith(ArrayList::new).thenConsumeWhile(x -> true)
+				.consumeRecordedWith(actualAddresses -> {
+					actualAddresses.forEach(address -> log.info(address.toString()));
+					assertEquals(2, actualAddresses.size());
+					assertTrue(actualAddresses.containsAll(expectedAddresses));
+
+				}).verifyComplete();
+	}
+	
+	@Test
+	@Order(value = 13)
+	public void testCreateFatUnitAddressesFromES() {
+
+		// Check the Unit Addresses from Test 11 were added to the ES index
+		List<HybridAddressFat> expectedAddresses = new ArrayList<>(List.of(hybridAddressFat1, hybridAddressFat2));
+
+		expectedAddresses.stream().map(HybridAddressFat::getUprn).forEach(id -> StepVerifier
+				.create(fatRepository.findById(String.valueOf(id))).expectNextCount(1).verifyComplete());
+
+	}
+
+	@Test
+	@Order(value = 14)
+	public void testCreateSkinnyUnitAddressesFromES() {
+
+		// Check the Unit Addresses from Test 12 were added to the ES index
+		List<HybridAddressSkinny> expectedAddresses = new ArrayList<>(List.of(hybridAddressSkinny1, hybridAddressSkinny2));
+
+		expectedAddresses.stream().map(HybridAddressSkinny::getUprn).forEach(id -> StepVerifier
+				.create(skinnyRepository.findById(String.valueOf(id))).expectNextCount(1).verifyComplete());
+
 	}
 }

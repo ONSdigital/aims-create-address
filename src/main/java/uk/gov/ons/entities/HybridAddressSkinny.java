@@ -8,8 +8,8 @@ import lombok.EqualsAndHashCode;
 import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 
 @Document(indexName = "#{@config.skinnyIndexName}", createIndex = false)
-@TypeAlias("unit-address")
-@EqualsAndHashCode(callSuper=true)
+@TypeAlias("unit-address-skinny")
+@EqualsAndHashCode(callSuper = true)
 public @Data class HybridAddressSkinny extends HybridAddress {
 
 	private LpiSkinny lpi;
