@@ -52,7 +52,7 @@ logging:
         data:
           elasticsearch:
             client:
-              WIRE: INFO
+              WIRE: TRACE
     reactor:
       netty: INFO
 aims:
@@ -71,8 +71,8 @@ aims:
       skinny:
         name: index_skinny_nohist_current
     client:
-      socket-timeout: 300000
-      connect-timeout: 300000
+      socket-timeout: 10000
+      connect-timeout: 10000
   tokeniser:
     uri: http://localhost:8081
     path: /tokens?address={address}

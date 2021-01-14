@@ -19,6 +19,8 @@ public @Data class LpiSkinny {
 	@Transient
 	private String organisationName;
 	@Transient
+	private String organisation;
+	@Transient
 	private String departmentName;
 	@Transient
 	private String subBuildingName;
@@ -68,6 +70,7 @@ public @Data class LpiSkinny {
 	private String addressLine3;
 
 	public LpiSkinny(LpiSkinnyBuilder builder) {
+		this.organisation = builder.organisation;
 		this.organisationName = builder.organisationName;
 		this.departmentName = builder.departmentName;
 		this.subBuildingName = builder.subBuildingName;
@@ -129,7 +132,7 @@ public @Data class LpiSkinny {
 
 	public String getMixedNag() {
 		return Stream.of(
-				Stream.of(this.addressLine1, this.addressLine2, this.addressLine3, this.townNameUnitAddress,
+				Stream.of(this.organisation, this.addressLine1, this.addressLine2, this.addressLine3, this.townNameUnitAddress,
 						this.postcode).filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(", ")),
 				this.postcode.replaceAll(" ", "")).collect(Collectors.joining(" "));
 	}
@@ -144,6 +147,7 @@ public @Data class LpiSkinny {
 
 	public static class LpiSkinnyBuilder {
 		
+		private String organisation;
 		private String organisationName;
 		private String departmentName;
 		private String subBuildingName;
@@ -175,6 +179,11 @@ public @Data class LpiSkinny {
 		private String addressLine1;
 		private String addressLine2;
 		private String addressLine3;
+		
+		public LpiSkinnyBuilder organisation(String organisation) {
+			this.organisation = organisation;
+			return this;
+		}
 		
 		public LpiSkinnyBuilder organisationName(String organisationName) {
 			this.organisationName = organisationName;

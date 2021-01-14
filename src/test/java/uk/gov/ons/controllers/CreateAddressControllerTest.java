@@ -104,7 +104,7 @@ public class CreateAddressControllerTest {
 			.expectBody(String.class)
 			.consumeWith(response -> {
 				// Does the response contain the 2 UPRN values uploaded?
-				assertTrue(response.toString().contains("8881000000001"));
+				assertTrue(response.toString().contains("8881000006833"));
 				assertTrue(response.toString().contains("8881000008109"));			
 			});
 	}	

@@ -35,9 +35,9 @@ public final class HybridAddressFatMapper {
 				.addressLine1(unitAddress.getAddressLine1())
 				.addressLine2(unitAddress.getAddressLine2())
 				.addressLine3(unitAddress.getAddressLine3())
-				.paoEndNumber(!tokeniserResponse.getPaoStartNumber().isEmpty() ? Short.parseShort(tokeniserResponse.getPaoStartNumber()) : null)
+				.paoEndNumber(!tokeniserResponse.getPaoEndNumber().isEmpty() ? Short.parseShort(tokeniserResponse.getPaoEndNumber()) : null)
 				.paoEndSuffix(tokeniserResponse.getPaoEndSuffix())
-				.saoEndNumber(!tokeniserResponse.getSaoStartNumber().isEmpty() ? Short.parseShort(tokeniserResponse.getSaoStartNumber()) : null)
+				.saoEndNumber(!tokeniserResponse.getSaoEndNumber().isEmpty() ? Short.parseShort(tokeniserResponse.getSaoEndNumber()) : null)
 				.saoEndSuffix(tokeniserResponse.getSaoEndSuffix())
 				.saoStartSuffix(tokeniserResponse.getSaoStartSuffix())
 				.build();
