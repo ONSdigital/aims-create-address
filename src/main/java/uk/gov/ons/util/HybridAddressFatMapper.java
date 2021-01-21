@@ -40,6 +40,7 @@ public final class HybridAddressFatMapper {
 				.saoEndNumber(!tokeniserResponse.getSaoEndNumber().isEmpty() ? Short.parseShort(tokeniserResponse.getSaoEndNumber()) : null)
 				.saoEndSuffix(tokeniserResponse.getSaoEndSuffix())
 				.saoStartSuffix(tokeniserResponse.getSaoStartSuffix())
+				.lpiLogicalStatus((byte) 1)
 				.build();
 			
 		CountryCode countryCode;

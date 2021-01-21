@@ -303,6 +303,7 @@ class AddressServiceTest {
 		mockTokeniserUnitResponse1.setPostcode("B15 3TE");
 		mockTokeniserUnitResponse1.setPostcodeIn("3TE");
 		mockTokeniserUnitResponse1.setPostcodeOut("B15");
+		mockTokeniserUnitResponse1.setLpiLogicalStatus("1");
 
 		mockTokeniserUnitResponse2 = new TokeniserResponse();
 		mockTokeniserUnitResponse2.setOrganisationName("UNIVERSITY OF CENTRAL LANCASHIRE");
@@ -324,6 +325,7 @@ class AddressServiceTest {
 		mockTokeniserUnitResponse2.setPostcode("PR1 7QR");
 		mockTokeniserUnitResponse2.setPostcodeIn("7QR");
 		mockTokeniserUnitResponse2.setPostcodeOut("PR1");
+		mockTokeniserUnitResponse2.setLpiLogicalStatus("1");
 
 		fatLpi1 = new Lpi.LpiBuilder().organisationName(mockTokeniserUnitResponse1.getOrganisationName())
 				.organisation(validatedAddresses.get(0).getAddress().getOrganisationName()).departmentName(mockTokeniserUnitResponse1.getDepartmentName())
@@ -359,7 +361,11 @@ class AddressServiceTest {
 						? Short.parseShort(mockTokeniserUnitResponse1.getSaoEndNumber())
 						: null)
 				.saoEndSuffix(mockTokeniserUnitResponse1.getSaoEndSuffix())
-				.saoStartSuffix(mockTokeniserUnitResponse1.getSaoStartSuffix()).build();
+				.saoStartSuffix(mockTokeniserUnitResponse1.getSaoStartSuffix())
+				.lpiLogicalStatus(!mockTokeniserUnitResponse1.getLpiLogicalStatus().isEmpty()
+						? Byte.valueOf(mockTokeniserUnitResponse1.getLpiLogicalStatus())
+						: null)
+				.build();
 
 		fatLpi2 = new Lpi.LpiBuilder().organisationName(mockTokeniserUnitResponse2.getOrganisationName())
 				.organisation(validatedAddresses.get(1).getAddress().getOrganisationName()).departmentName(mockTokeniserUnitResponse2.getDepartmentName())
@@ -391,7 +397,11 @@ class AddressServiceTest {
 						? Short.parseShort(mockTokeniserUnitResponse2.getSaoEndNumber())
 						: null)
 				.saoEndSuffix(mockTokeniserUnitResponse2.getSaoEndSuffix())
-				.saoStartSuffix(mockTokeniserUnitResponse2.getSaoStartSuffix()).build();
+				.saoStartSuffix(mockTokeniserUnitResponse2.getSaoStartSuffix())
+				.lpiLogicalStatus(!mockTokeniserUnitResponse2.getLpiLogicalStatus().isEmpty()
+						? Byte.valueOf(mockTokeniserUnitResponse2.getLpiLogicalStatus())
+						: null)
+				.build();
 
 		hybridAddressFat1 = new HybridAddressFat(Long.valueOf(validatedAddresses.get(0).getAddress().getUprn()),
 				fatLpi1, validatedAddresses.get(0).getAddress().getAbpCode(),
@@ -436,6 +446,9 @@ class AddressServiceTest {
 				.addressLine1(validatedAddresses.get(0).getAddress().getAddressLine1())
 				.addressLine2(validatedAddresses.get(0).getAddress().getAddressLine2())
 				.addressLine3(validatedAddresses.get(0).getAddress().getAddressLine3())
+				.lpiLogicalStatus(!mockTokeniserUnitResponse1.getLpiLogicalStatus().isEmpty()
+						? Byte.valueOf(mockTokeniserUnitResponse1.getLpiLogicalStatus())
+						: null)
 				.build();
 
 		skinnyLpi2 = new LpiSkinny.LpiSkinnyBuilder()
@@ -463,6 +476,9 @@ class AddressServiceTest {
 				.addressLine1(validatedAddresses.get(1).getAddress().getAddressLine1())
 				.addressLine2(validatedAddresses.get(1).getAddress().getAddressLine2())
 				.addressLine3(validatedAddresses.get(1).getAddress().getAddressLine3())
+				.lpiLogicalStatus(!mockTokeniserUnitResponse2.getLpiLogicalStatus().isEmpty()
+						? Byte.valueOf(mockTokeniserUnitResponse2.getLpiLogicalStatus())
+						: null)
 				.build();
 		
 		hybridAddressSkinny1 = new HybridAddressSkinny(Long.valueOf(validatedAddresses.get(0).getAddress().getUprn()),
