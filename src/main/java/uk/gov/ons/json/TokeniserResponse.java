@@ -23,5 +23,4 @@ public @Data class TokeniserResponse {
 	private String postcode;
 	private String postcodeIn;
 	private String postcodeOut;
-	private String lpiLogicalStatus;
 }
