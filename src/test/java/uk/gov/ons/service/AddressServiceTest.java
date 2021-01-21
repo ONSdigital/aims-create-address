@@ -359,7 +359,9 @@ class AddressServiceTest {
 						? Short.parseShort(mockTokeniserUnitResponse1.getSaoEndNumber())
 						: null)
 				.saoEndSuffix(mockTokeniserUnitResponse1.getSaoEndSuffix())
-				.saoStartSuffix(mockTokeniserUnitResponse1.getSaoStartSuffix()).build();
+				.saoStartSuffix(mockTokeniserUnitResponse1.getSaoStartSuffix())
+				.lpiLogicalStatus((byte) 1)
+				.build();
 
 		fatLpi2 = new Lpi.LpiBuilder().organisationName(mockTokeniserUnitResponse2.getOrganisationName())
 				.organisation(validatedAddresses.get(1).getAddress().getOrganisationName()).departmentName(mockTokeniserUnitResponse2.getDepartmentName())
@@ -391,7 +393,9 @@ class AddressServiceTest {
 						? Short.parseShort(mockTokeniserUnitResponse2.getSaoEndNumber())
 						: null)
 				.saoEndSuffix(mockTokeniserUnitResponse2.getSaoEndSuffix())
-				.saoStartSuffix(mockTokeniserUnitResponse2.getSaoStartSuffix()).build();
+				.saoStartSuffix(mockTokeniserUnitResponse2.getSaoStartSuffix())
+				.lpiLogicalStatus((byte) 1)
+				.build();
 
 		hybridAddressFat1 = new HybridAddressFat(Long.valueOf(validatedAddresses.get(0).getAddress().getUprn()),
 				fatLpi1, validatedAddresses.get(0).getAddress().getAbpCode(),
@@ -436,6 +440,7 @@ class AddressServiceTest {
 				.addressLine1(validatedAddresses.get(0).getAddress().getAddressLine1())
 				.addressLine2(validatedAddresses.get(0).getAddress().getAddressLine2())
 				.addressLine3(validatedAddresses.get(0).getAddress().getAddressLine3())
+				.lpiLogicalStatus((byte) 1)
 				.build();
 
 		skinnyLpi2 = new LpiSkinny.LpiSkinnyBuilder()
@@ -463,6 +468,7 @@ class AddressServiceTest {
 				.addressLine1(validatedAddresses.get(1).getAddress().getAddressLine1())
 				.addressLine2(validatedAddresses.get(1).getAddress().getAddressLine2())
 				.addressLine3(validatedAddresses.get(1).getAddress().getAddressLine3())
+				.lpiLogicalStatus((byte) 1)
 				.build();
 		
 		hybridAddressSkinny1 = new HybridAddressSkinny(Long.valueOf(validatedAddresses.get(0).getAddress().getUprn()),

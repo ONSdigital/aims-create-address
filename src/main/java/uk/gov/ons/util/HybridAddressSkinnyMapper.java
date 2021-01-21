@@ -35,6 +35,7 @@ public final class HybridAddressSkinnyMapper {
 				.addressLine1(unitAddress.getAddressLine1())
 				.addressLine2(unitAddress.getAddressLine2())
 				.addressLine3(unitAddress.getAddressLine3())
+				.lpiLogicalStatus((byte) 1)
 				.build();
 			
 		CountryCode countryCode;
