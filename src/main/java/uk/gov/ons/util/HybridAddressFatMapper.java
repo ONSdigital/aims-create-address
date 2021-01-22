@@ -6,6 +6,8 @@ import uk.gov.ons.entities.UnitAddress;
 import uk.gov.ons.json.TokeniserResponse;
 import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 
+import java.util.List;
+
 public final class HybridAddressFatMapper {
 	
 	public static HybridAddressFat from(UnitAddress unitAddress, TokeniserResponse tokeniserResponse) throws NumberFormatException
@@ -41,6 +43,7 @@ public final class HybridAddressFatMapper {
 				.saoEndSuffix(tokeniserResponse.getSaoEndSuffix())
 				.saoStartSuffix(tokeniserResponse.getSaoStartSuffix())
 				.lpiLogicalStatus((byte) 1)
+				.language("ENG")
 				.build();
 			
 		CountryCode countryCode;
@@ -73,7 +76,7 @@ public final class HybridAddressFatMapper {
 		
 		return new HybridAddressFat(
 				lpi.getUprn(),
-				lpi,
+				List.of(lpi),
 				unitAddress.getAbpCode(),
 				unitAddress.getAddressType(),
 				unitAddress.getEstabType(),
