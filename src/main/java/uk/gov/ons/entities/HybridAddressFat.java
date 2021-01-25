@@ -17,8 +17,8 @@ public @Data class HybridAddressFat extends HybridAddress {
 	private final List<Lpi> lpi;
 	
 	public HybridAddressFat(Long uprn, List<Lpi> lpi, String classificationCode, String censusAddressType, String censusEstabType,
-							String postcode, CountryCode countryCode, String postTown) {
-		super(uprn, classificationCode, censusAddressType, censusEstabType, postcode, countryCode, postTown);
+							String postcode, CountryCode countryCode, String postcodeStreetTown, String postTown) {
+		super(uprn, classificationCode, censusAddressType, censusEstabType, postcode, countryCode, postcodeStreetTown, postTown);
 		this.lpi = lpi;
 	}
 }

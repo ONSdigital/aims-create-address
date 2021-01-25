@@ -73,7 +73,14 @@ public final class HybridAddressFatMapper {
 		default:
 			countryCode = null;	
 		}
-		
+
+		String postcodeStreetTown = (
+					tokeniserResponse.getPostcode() + "_" +
+					tokeniserResponse.getStreetName() + "_" +
+					tokeniserResponse.getTownName() )
+				.replace(".","")
+				.replace("'","");
+
 		return new HybridAddressFat(
 				lpi.getUprn(),
 				List.of(lpi),
@@ -82,6 +89,7 @@ public final class HybridAddressFatMapper {
 				unitAddress.getEstabType(),
 				tokeniserResponse.getPostcode(),
 				countryCode,
+				postcodeStreetTown,
 				tokeniserResponse.getTownName());
 	}
 }
