@@ -399,18 +399,34 @@ class AddressServiceTest {
 				.language("ENG")
 				.build();
 
+		String fatPostcodeStreetTown1 = (
+					mockTokeniserUnitResponse1.getPostcode() + "_" +
+					mockTokeniserUnitResponse1.getStreetName() + "_" +
+					mockTokeniserUnitResponse1.getTownName() )
+				.replace(".","")
+				.replace("'","");
+
 		hybridAddressFat1 = new HybridAddressFat(Long.valueOf(validatedAddresses.get(0).getAddress().getUprn()),
 				List.of(fatLpi1), validatedAddresses.get(0).getAddress().getAbpCode(),
 				validatedAddresses.get(0).getAddress().getAddressType(),
 				validatedAddresses.get(0).getAddress().getEstabType(),
 				validatedAddresses.get(0).getAddress().getPostcode(), CountryCode.E,
+				fatPostcodeStreetTown1,
 				mockTokeniserUnitResponse1.getTownName());
+
+		String fatPostcodeStreetTown2 = (
+					mockTokeniserUnitResponse2.getPostcode() + "_" +
+					mockTokeniserUnitResponse2.getStreetName() + "_" +
+					mockTokeniserUnitResponse2.getTownName() )
+				.replace(".","")
+				.replace("'","");
 
 		hybridAddressFat2 = new HybridAddressFat(Long.valueOf(validatedAddresses.get(1).getAddress().getUprn()),
 				List.of(fatLpi2), validatedAddresses.get(1).getAddress().getAbpCode(),
 				validatedAddresses.get(1).getAddress().getAddressType(),
 				validatedAddresses.get(1).getAddress().getEstabType(),
 				validatedAddresses.get(1).getAddress().getPostcode(), CountryCode.E,
+				fatPostcodeStreetTown2,
 				mockTokeniserUnitResponse2.getTownName());
 		
 		skinnyLpi1 = new LpiSkinny.LpiSkinnyBuilder()
@@ -474,19 +490,35 @@ class AddressServiceTest {
 				.lpiLogicalStatus((byte) 1)
 				.language("ENG")
 				.build();
-		
+
+		String skinnyPostcodeStreetTown1 = (
+					mockTokeniserUnitResponse1.getPostcode() + "_" +
+					mockTokeniserUnitResponse1.getStreetName() + "_" +
+					mockTokeniserUnitResponse1.getTownName() )
+				.replace(".","")
+				.replace("'","");
+
 		hybridAddressSkinny1 = new HybridAddressSkinny(Long.valueOf(validatedAddresses.get(0).getAddress().getUprn()),
 				List.of(skinnyLpi1), validatedAddresses.get(0).getAddress().getAbpCode(),
 				validatedAddresses.get(0).getAddress().getAddressType(),
 				validatedAddresses.get(0).getAddress().getEstabType(),
 				validatedAddresses.get(0).getAddress().getPostcode(), CountryCode.E,
+				skinnyPostcodeStreetTown1,
 				mockTokeniserUnitResponse1.getTownName());
+
+		String skinnyPostcodeStreetTown2 = (
+					mockTokeniserUnitResponse2.getPostcode() + "_" +
+					mockTokeniserUnitResponse2.getStreetName() + "_" +
+					mockTokeniserUnitResponse2.getTownName() )
+				.replace(".","")
+				.replace("'","");
 
 		hybridAddressSkinny2 = new HybridAddressSkinny(Long.valueOf(validatedAddresses.get(1).getAddress().getUprn()),
 				List.of(skinnyLpi2), validatedAddresses.get(1).getAddress().getAbpCode(),
 				validatedAddresses.get(1).getAddress().getAddressType(),
 				validatedAddresses.get(1).getAddress().getEstabType(),
 				validatedAddresses.get(1).getAddress().getPostcode(), CountryCode.E,
+				skinnyPostcodeStreetTown2,
 				mockTokeniserUnitResponse2.getTownName());
 	}
 	

@@ -68,7 +68,14 @@ public final class HybridAddressSkinnyMapper {
 		default:
 			countryCode = null;	
 		}
-		
+
+		String postcodeStreetTown = (
+					tokeniserResponse.getPostcode() + "_" +
+					tokeniserResponse.getStreetName() + "_" +
+					tokeniserResponse.getTownName() )
+				.replace(".","")
+				.replace("'","");
+
 		return new HybridAddressSkinny(
 				lpi.getUprn(),
 				List.of(lpi),
@@ -77,6 +84,7 @@ public final class HybridAddressSkinnyMapper {
 				unitAddress.getEstabType(),
 				tokeniserResponse.getPostcode(),
 				countryCode,
+				postcodeStreetTown,
 				tokeniserResponse.getTownName());
 	}
 }
