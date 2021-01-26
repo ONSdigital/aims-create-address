@@ -8,11 +8,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 
+import java.util.List;
 
 @Document(indexName = "#{@config.auxIndexName}")
 @TypeAlias("address")
 @AllArgsConstructor
 public @Data class Address {
+
+	@TypeAlias("lpi")
+	public static @Data class Lpi {
+		private String streetDescriptor = "";
+	}
 
 	@Id
 	private Long uprn;
@@ -25,4 +31,5 @@ public @Data class Address {
 	private CountryCode countryCode;
 	private String postcode;
 	private Tokens tokens;
+	private List<Lpi> lpi;
 }

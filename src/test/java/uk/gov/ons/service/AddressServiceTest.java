@@ -182,6 +182,8 @@ class AddressServiceTest {
 	private CountryCode countryCode2 = CountryCode.W;
 	private Long censusEstabUprn = 808L;
 
+	private List<Address.Lpi> testAddressLpi = List.of(new Address.Lpi());
+
 	private Tokens tokens = new Tokens.TokensBuilder().organisationName(organisationName)
 			.subBuildingName(subBuildingName).buildingName(buildingName).buildingNumber(buildingNumber)
 			.paoStartNumber(paoStartNumber).saoStartSuffix(saoStartSuffix).saoStartNumber(null) // Ignored - doesn't
@@ -191,7 +193,7 @@ class AddressServiceTest {
 			.postcode(postcode).build();
 
 	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode, postcode, tokens);
+			censusEstabType, censusEstabUprn, countryCode, postcode, tokens, testAddressLpi);
 
 	private Tokens tokens2 = new Tokens.TokensBuilder().buildingName(buildingName2).paoStartNumber(paoStartNumber2)
 			.saoStartSuffix(saoStartSuffix2).streetName(streetName2).locality(locality).townName(townName)
@@ -200,7 +202,7 @@ class AddressServiceTest {
 			.build();
 
 	private Address address2 = new Address(uprn2, postcodeIn2, postcodeOut2, classificationCode2, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode, postcode2, tokens2);
+			censusEstabType, censusEstabUprn, countryCode, postcode2, tokens2, testAddressLpi);
 
 	private Tokens tokens3 = new Tokens.TokensBuilder().buildingName(buildingName3).paoStartNumber(paoStartNumber3)
 			.streetName(streetName3).locality(locality).townName(townName).addressLevel(addressLevel).uprn(uprn3)
@@ -208,7 +210,7 @@ class AddressServiceTest {
 			.addressLine3(addressLine33).postcode(postcode3).build();
 
 	private Address address3 = new Address(uprn3, postcodeIn3, postcodeOut3, classificationCode3, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode, postcode3, tokens3);
+			censusEstabType, censusEstabUprn, countryCode, postcode3, tokens3, testAddressLpi);
 
 	private Tokens tokens4 = new Tokens.TokensBuilder().organisationName("").departmentName("").subBuildingName("")
 			.buildingName(buildingName4).subBuildingName(subBuildingName4).paoStartSuffix("")
@@ -218,7 +220,7 @@ class AddressServiceTest {
 			.addressLine3(addressLine43).postcode(postcode4).build();
 
 	private Address address4 = new Address(uprn4, postcodeIn4, postcodeOut4, classificationCode, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode, postcode4, tokens4);
+			censusEstabType, censusEstabUprn, countryCode, postcode4, tokens4, testAddressLpi);
 
 	private Tokens tokens5 = new Tokens.TokensBuilder().organisationName(organisationName).departmentName("")
 			.buildingName(buildingName5).subBuildingName(subBuildingName5).buildingNumber(buildingNumber5)
@@ -228,7 +230,7 @@ class AddressServiceTest {
 			.addressLine2(addressLine52).addressLine3(addressLine53).postcode(postcode5).build();
 
 	private Address address5 = new Address(uprn5, postcodeIn5, postcodeOut5, classificationCode, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode, postcode5, tokens5);
+			censusEstabType, censusEstabUprn, countryCode, postcode5, tokens5, testAddressLpi);
 
 	private Tokens tokens6 = new Tokens.TokensBuilder().organisationName("").departmentName("")
 			.buildingName(buildingName6).subBuildingName("").paoStartSuffix("").paoStartNumber(paoStartNumber6)
@@ -237,7 +239,7 @@ class AddressServiceTest {
 			.addressLine2(addressLine62).addressLine3(addressLine63).postcode(postcode5).build();
 
 	private Address address6 = new Address(uprn6, postcodeIn5, postcodeOut5, classificationCode3, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode2, postcode5, tokens6);
+			censusEstabType, censusEstabUprn, countryCode2, postcode5, tokens6, testAddressLpi);
 	
 	private List<Address> addresses = Arrays.asList(address2, address3);
 	private List<ValidatedAddress<UnitAddress>> validatedAddresses;

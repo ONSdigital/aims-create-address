@@ -6,8 +6,10 @@ import uk.gov.ons.entities.Tokens;
 import uk.gov.ons.json.TokeniserResponse;
 import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 
+import java.util.List;
+
 public final class AddressMapper {
-	
+
 	public static Address from(InputAddress inputAddress, TokeniserResponse tokeniserResponse) throws NumberFormatException
 	{
 		Tokens tokens = new Tokens.TokensBuilder()
@@ -64,7 +66,7 @@ public final class AddressMapper {
 		default:
 			countryCode = null;	
 		}
-		
+
 		Address address = new Address(
 				inputAddress.getUprn() != null && !inputAddress.getUprn().isEmpty() ? Long.parseLong(inputAddress.getUprn()): null, 
 				tokeniserResponse.getPostcodeIn(),
@@ -75,7 +77,8 @@ public final class AddressMapper {
 				inputAddress.getEstabUprn() != null && !inputAddress.getEstabUprn().isEmpty() ? Long.parseLong(inputAddress.getEstabUprn()): null,
 				countryCode, 
 				tokeniserResponse.getPostcode(),
-				tokens);
+				tokens,
+				List.of(new Address.Lpi()));
 		
 		return address;
 	}
