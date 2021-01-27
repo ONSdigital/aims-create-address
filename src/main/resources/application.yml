@@ -23,6 +23,7 @@ spring:
   servlet:
     multipart:
       max-file-size: 100MB
+      max-request-size: 25MB
   thymeleaf:
     reactive:
       max-chunk-size: 8192
