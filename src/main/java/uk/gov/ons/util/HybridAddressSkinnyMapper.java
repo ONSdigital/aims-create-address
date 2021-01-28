@@ -6,6 +6,8 @@ import uk.gov.ons.entities.UnitAddress;
 import uk.gov.ons.json.TokeniserResponse;
 import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 
+import java.util.List;
+
 public final class HybridAddressSkinnyMapper {
 	
 	public static HybridAddressSkinny from(UnitAddress unitAddress, TokeniserResponse tokeniserResponse) throws NumberFormatException
@@ -35,6 +37,8 @@ public final class HybridAddressSkinnyMapper {
 				.addressLine1(unitAddress.getAddressLine1())
 				.addressLine2(unitAddress.getAddressLine2())
 				.addressLine3(unitAddress.getAddressLine3())
+				.lpiLogicalStatus((byte) 1)
+				.language("ENG")
 				.build();
 			
 		CountryCode countryCode;
@@ -64,15 +68,23 @@ public final class HybridAddressSkinnyMapper {
 		default:
 			countryCode = null;	
 		}
-		
+
+		String postcodeStreetTown = (
+					tokeniserResponse.getPostcode() + "_" +
+					tokeniserResponse.getStreetName() + "_" +
+					tokeniserResponse.getTownName() )
+				.replace(".","")
+				.replace("'","");
+
 		return new HybridAddressSkinny(
 				lpi.getUprn(),
-				lpi,
+				List.of(lpi),
 				unitAddress.getAbpCode(),
 				unitAddress.getAddressType(),
 				unitAddress.getEstabType(),
 				tokeniserResponse.getPostcode(),
 				countryCode,
+				postcodeStreetTown,
 				tokeniserResponse.getTownName());
 	}
 }

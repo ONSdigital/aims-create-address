@@ -17,7 +17,7 @@ public @Data class HybridAddress {
 //	private Long censusEstabUprn;
 	private String postcode;
 	private CountryCode countryCode;
-//	private String postcodeStreetTown;
+	private String postcodeStreetTown;
 	private String postTown;
 
 }
