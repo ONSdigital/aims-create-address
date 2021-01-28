@@ -7,6 +7,8 @@ import org.springframework.data.geo.Point;
 
 import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 
+import java.util.List;
+
 class AddressTest {
 
 	private String addressAll = "ACME FLOWERS LTD FLAT C CHESTERFIELD LODGE 78 BEULAH HILL LONDON SE19 3EX";
@@ -51,9 +53,9 @@ class AddressTest {
 			.addressLine1(addressLine1)
 			.addressLine2(addressLine2)
 			.addressLine3(addressLine3)
-			.postcode(postcode).build();	
-	
-	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode, tokens);
+			.postcode(postcode).build();
+
+	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode, tokens, List.of(new Address.Lpi()), List.of(new Address.Nisra()));
 		
 	@Test
 	void testAddressCreation() {

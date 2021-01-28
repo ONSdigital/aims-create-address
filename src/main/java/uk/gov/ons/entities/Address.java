@@ -8,11 +8,27 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import uk.gov.ons.util.CreateAddressConstants.CountryCode;
 
+import java.util.List;
 
 @Document(indexName = "#{@config.auxIndexName}")
 @TypeAlias("address")
 @AllArgsConstructor
 public @Data class Address {
+
+	@TypeAlias("lpi")
+	public static @Data class Lpi {
+		private String streetDescriptor = "";
+		private Short paoStartNumber = 0;
+		private String paoStartSuffix = "";
+		private String secondarySort = "";
+	}
+
+	@TypeAlias("nisra")
+	public static @Data class Nisra {
+		private String thoroughfare = "";
+		private Short paoStartNumber = 0;
+		private String secondarySort = "";
+	}
 
 	@Id
 	private Long uprn;
@@ -25,4 +41,6 @@ public @Data class Address {
 	private CountryCode countryCode;
 	private String postcode;
 	private Tokens tokens;
+	private List<Lpi> lpi;
+	private List<Nisra> nisra;
 }
