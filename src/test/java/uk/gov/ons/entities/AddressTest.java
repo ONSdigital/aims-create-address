@@ -53,9 +53,9 @@ class AddressTest {
 			.addressLine1(addressLine1)
 			.addressLine2(addressLine2)
 			.addressLine3(addressLine3)
-			.postcode(postcode).build();	
-	
-	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode, tokens, List.of(new Address.Lpi()));
+			.postcode(postcode).build();
+
+	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode, tokens, List.of(new Address.Lpi()), List.of(new Address.Nisra()));
 		
 	@Test
 	void testAddressCreation() {

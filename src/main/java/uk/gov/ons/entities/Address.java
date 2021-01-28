@@ -18,6 +18,16 @@ public @Data class Address {
 	@TypeAlias("lpi")
 	public static @Data class Lpi {
 		private String streetDescriptor = "";
+		private Short paoStartNumber = 0;
+		private String paoStartSuffix = "";
+		private String secondarySort = "";
+	}
+
+	@TypeAlias("nisra")
+	public static @Data class Nisra {
+		private String thoroughfare = "";
+		private Short paoStartNumber = 0;
+		private String secondarySort = "";
 	}
 
 	@Id
@@ -32,4 +42,5 @@ public @Data class Address {
 	private String postcode;
 	private Tokens tokens;
 	private List<Lpi> lpi;
+	private List<Nisra> nisra;
 }

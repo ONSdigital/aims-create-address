@@ -43,6 +43,56 @@
 			"index": "true",
 			"analyzer": "keyword"
 		},
+		"lpi" : {
+			"properties" : {
+				"paoStartNumber": {
+					"type": "short",
+					"index": "true"
+				},
+				"paoStartSuffix": {
+					"type": "text",
+					"index": "true",
+					"analyzer": "keyword",
+					"fields": {
+						"keyword": {
+							"type": "keyword"
+						}
+					}
+				},
+				"secondarySort": {
+					"type": "keyword"
+				},
+				"streetDescriptor": {
+					"type": "text",
+					"analyzer": "welsh_no_split_analyzer",
+					"fields": {
+						"keyword": {
+							"type": "keyword"
+						}
+					}
+				}
+			}
+		},
+		"nisra" : {
+			"properties" : {
+				"paoStartNumber": {
+					"type": "short",
+					"index": "true"
+				},
+				"secondarySort": {
+					"type": "keyword"
+				},
+				"thoroughfare": {
+					"type": "text",
+					"analyzer": "welsh_no_split_analyzer",
+					"fields": {
+						"keyword": {
+							"type": "keyword"
+						}
+					}
+				}
+			}
+		},
 		"tokens": {
 			"properties": {
 				"buildingName": {

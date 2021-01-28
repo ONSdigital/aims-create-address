@@ -78,7 +78,8 @@ public final class AddressMapper {
 				countryCode, 
 				tokeniserResponse.getPostcode(),
 				tokens,
-				List.of(new Address.Lpi()));
+				List.of(new Address.Lpi()),
+				List.of(new Address.Nisra()));
 		
 		return address;
 	}
