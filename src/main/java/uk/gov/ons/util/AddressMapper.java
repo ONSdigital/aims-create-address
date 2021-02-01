@@ -67,6 +67,13 @@ public final class AddressMapper {
 			countryCode = null;	
 		}
 
+		String postcodeStreetTown = (
+					tokens.getPostcode() + "_" +
+					tokens.getStreetName() + "_" +
+					tokens.getTownName() )
+				.replace(".","")
+				.replace("'","");
+
 		Address address = new Address(
 				inputAddress.getUprn() != null && !inputAddress.getUprn().isEmpty() ? Long.parseLong(inputAddress.getUprn()): null, 
 				tokeniserResponse.getPostcodeIn(),
@@ -75,8 +82,10 @@ public final class AddressMapper {
 				inputAddress.getAddressType(),
 				inputAddress.getEstabType(),
 				inputAddress.getEstabUprn() != null && !inputAddress.getEstabUprn().isEmpty() ? Long.parseLong(inputAddress.getEstabUprn()): null,
-				countryCode, 
+				countryCode,
 				tokeniserResponse.getPostcode(),
+				postcodeStreetTown,
+				tokens.getAddressAll(),
 				tokens,
 				List.of(new Address.Lpi()),
 				List.of(new Address.Nisra()));

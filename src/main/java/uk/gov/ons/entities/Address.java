@@ -40,6 +40,8 @@ public @Data class Address {
 	private Long censusEstabUprn;
 	private CountryCode countryCode;
 	private String postcode;
+	private String postcodeStreetTown;
+	private String mixedPartial;
 	private Tokens tokens;
 	private List<Lpi> lpi;
 	private List<Nisra> nisra;

@@ -193,8 +193,13 @@ class AddressServiceTest {
 			.longitude(longitude).addressLine1(addressLine1).addressLine2(addressLine2).addressLine3(addressLine3)
 			.postcode(postcode).build();
 
+	private String postcodeStreetTown = (postcode + "_" + streetName + "_" + townName )
+			.replace(".","")
+			.replace("'","");
+
 	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode, postcode, tokens, testAddressLpi, testAddressNisra);
+			censusEstabType, censusEstabUprn, countryCode, postcode, postcodeStreetTown, tokens.getAddressAll(), tokens,
+			testAddressLpi, testAddressNisra);
 
 	private Tokens tokens2 = new Tokens.TokensBuilder().buildingName(buildingName2).paoStartNumber(paoStartNumber2)
 			.saoStartSuffix(saoStartSuffix2).streetName(streetName2).locality(locality).townName(townName)
@@ -202,16 +207,26 @@ class AddressServiceTest {
 			.addressLine1(addressLine21).addressLine2(addressLine22).addressLine3(addressLine23).postcode(postcode2)
 			.build();
 
+	private String postcodeStreetTown2 = (postcode2 + "_" + streetName2 + "_" + townName)
+			.replace(".","")
+			.replace("'","");
+
 	private Address address2 = new Address(uprn2, postcodeIn2, postcodeOut2, classificationCode2, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode, postcode2, tokens2, testAddressLpi, testAddressNisra);
+			censusEstabType, censusEstabUprn, countryCode, postcode2, postcodeStreetTown2, tokens2.getAddressAll(),
+			tokens2, testAddressLpi, testAddressNisra);
 
 	private Tokens tokens3 = new Tokens.TokensBuilder().buildingName(buildingName3).paoStartNumber(paoStartNumber3)
 			.streetName(streetName3).locality(locality).townName(townName).addressLevel(addressLevel).uprn(uprn3)
 			.latitude(latitude3).longitude(longitude3).addressLine1(addressLine31).addressLine2(addressLine32)
 			.addressLine3(addressLine33).postcode(postcode3).build();
 
+	private String postcodeStreetTown3 = (postcode3 + "_" + streetName3 + "_" + townName)
+			.replace(".","")
+			.replace("'","");
+
 	private Address address3 = new Address(uprn3, postcodeIn3, postcodeOut3, classificationCode3, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode, postcode3, tokens3, testAddressLpi, testAddressNisra);
+			censusEstabType, censusEstabUprn, countryCode, postcode3, postcodeStreetTown3, tokens3.getAddressAll(),
+			tokens3, testAddressLpi, testAddressNisra);
 
 	private Tokens tokens4 = new Tokens.TokensBuilder().organisationName("").departmentName("").subBuildingName("")
 			.buildingName(buildingName4).subBuildingName(subBuildingName4).paoStartSuffix("")
@@ -220,9 +235,13 @@ class AddressServiceTest {
 			.addressLevel(addressLevel).uprn(uprn4).addressLine1(addressLine41).addressLine2(addressLine42)
 			.addressLine3(addressLine43).postcode(postcode4).build();
 
-	private Address address4 = new Address(uprn4, postcodeIn4, postcodeOut4, classificationCode, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode, postcode4, tokens4, testAddressLpi, testAddressNisra);
+	private String postcodeStreetTown4 = (postcode4 + "_" + streetName4 + "_" + "")
+			.replace(".","")
+			.replace("'","");
 
+	private Address address4 = new Address(uprn4, postcodeIn4, postcodeOut4, classificationCode, censusAddressType,
+			censusEstabType, censusEstabUprn, countryCode, postcode4, postcodeStreetTown4, tokens4.getAddressAll(),
+			tokens4, testAddressLpi, testAddressNisra);
 
 	private Tokens tokens5 = new Tokens.TokensBuilder().organisationName(organisationName).departmentName("")
 			.buildingName(buildingName5).subBuildingName(subBuildingName5).buildingNumber(buildingNumber5)
@@ -231,8 +250,13 @@ class AddressServiceTest {
 			.addressLevel(addressLevel).uprn(uprn5).latitude(latitude).longitude(longitude).addressLine1(addressLine51)
 			.addressLine2(addressLine52).addressLine3(addressLine53).postcode(postcode5).build();
 
+	private String postcodeStreetTown5 = (postcode5 + "_" + streetName5 + "_" + townName)
+			.replace(".","")
+			.replace("'","");
+
 	private Address address5 = new Address(uprn5, postcodeIn5, postcodeOut5, classificationCode, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode, postcode5, tokens5, testAddressLpi, testAddressNisra);
+			censusEstabType, censusEstabUprn, countryCode, postcode5, postcodeStreetTown5, tokens5.getAddressAll(),
+			tokens5, testAddressLpi, testAddressNisra);
 
 	private Tokens tokens6 = new Tokens.TokensBuilder().organisationName("").departmentName("")
 			.buildingName(buildingName6).subBuildingName("").paoStartSuffix("").paoStartNumber(paoStartNumber6)
@@ -240,8 +264,13 @@ class AddressServiceTest {
 			.townName(townName).addressLevel(addressLevel).uprn(uprn6).addressLine1(addressLine61)
 			.addressLine2(addressLine62).addressLine3(addressLine63).postcode(postcode5).build();
 
+	private String postcodeStreetTown6 = (postcode5 + "_" + streetName6 + "_" + townName)
+			.replace(".","")
+			.replace("'","");
+
 	private Address address6 = new Address(uprn6, postcodeIn5, postcodeOut5, classificationCode3, censusAddressType,
-			censusEstabType, censusEstabUprn, countryCode2, postcode5, tokens6, testAddressLpi, testAddressNisra);
+			censusEstabType, censusEstabUprn, countryCode2, postcode5, postcodeStreetTown6, tokens6.getAddressAll(),
+			tokens6, testAddressLpi, testAddressNisra);
 	
 	private List<Address> addresses = Arrays.asList(address2, address3);
 	private List<ValidatedAddress<UnitAddress>> validatedAddresses;
