@@ -43,6 +43,15 @@
 			"index": "true",
 			"analyzer": "keyword"
 		},
+		"mixedPartial": {
+			"type": "text",
+			"search_analyzer": "keyword_analyzer",
+			"analyzer": "edge_ngram_analyzer"
+		},
+		"postcodeStreetTown": {
+			"type": "keyword",
+			"index": "true"
+		},
 		"lpi" : {
 			"properties" : {
 				"paoStartNumber": {

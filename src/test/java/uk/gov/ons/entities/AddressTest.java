@@ -55,7 +55,14 @@ class AddressTest {
 			.addressLine3(addressLine3)
 			.postcode(postcode).build();
 
-	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode, tokens, List.of(new Address.Lpi()), List.of(new Address.Nisra()));
+	String postcodeStreetTown = (
+				postcode + "_" +
+				streetName + "_" +
+				townName )
+			.replace(".","")
+			.replace("'","");
+
+	private Address address = new Address(uprn, postcodeIn, postcodeOut, classificationCode, censusAddressType, censusEstabType, censusEstabUprn, countryCode, postcode, postcodeStreetTown, tokens.getAddressAll(), tokens, List.of(new Address.Lpi()), List.of(new Address.Nisra()));
 		
 	@Test
 	void testAddressCreation() {
