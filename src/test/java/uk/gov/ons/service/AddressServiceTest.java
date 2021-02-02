@@ -235,7 +235,7 @@ class AddressServiceTest {
 			.addressLevel(addressLevel).uprn(uprn4).addressLine1(addressLine41).addressLine2(addressLine42)
 			.addressLine3(addressLine43).postcode(postcode4).build();
 
-	private String postcodeStreetTown4 = (postcode4 + "_" + streetName4 + "_" + "")
+	private String postcodeStreetTown4 = (postcode4 + "_" + streetName4 + "_" + locality)
 			.replace(".","")
 			.replace("'","");
 
