@@ -70,7 +70,7 @@ public final class AddressMapper {
 		String postcodeStreetTown = (
 					tokens.getPostcode() + "_" +
 					tokens.getStreetName() + "_" +
-					(!tokens.getTownName().isBlank() ? tokens.getTownName() : tokens.getLocality()))
+					(!tokens.getLocality().isBlank() ? tokens.getLocality() : tokens.getTownName()))
 				.replace(".","")
 				.replace("'","");
 

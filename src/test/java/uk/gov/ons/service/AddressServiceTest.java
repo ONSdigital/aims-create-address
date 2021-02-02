@@ -193,7 +193,7 @@ class AddressServiceTest {
 			.longitude(longitude).addressLine1(addressLine1).addressLine2(addressLine2).addressLine3(addressLine3)
 			.postcode(postcode).build();
 
-	private String postcodeStreetTown = (postcode + "_" + streetName + "_" + townName )
+	private String postcodeStreetTown = (postcode + "_" + streetName + "_" + townName)
 			.replace(".","")
 			.replace("'","");
 
@@ -207,7 +207,7 @@ class AddressServiceTest {
 			.addressLine1(addressLine21).addressLine2(addressLine22).addressLine3(addressLine23).postcode(postcode2)
 			.build();
 
-	private String postcodeStreetTown2 = (postcode2 + "_" + streetName2 + "_" + townName)
+	private String postcodeStreetTown2 = (postcode2 + "_" + streetName2 + "_" + locality)
 			.replace(".","")
 			.replace("'","");
 
@@ -220,7 +220,7 @@ class AddressServiceTest {
 			.latitude(latitude3).longitude(longitude3).addressLine1(addressLine31).addressLine2(addressLine32)
 			.addressLine3(addressLine33).postcode(postcode3).build();
 
-	private String postcodeStreetTown3 = (postcode3 + "_" + streetName3 + "_" + townName)
+	private String postcodeStreetTown3 = (postcode3 + "_" + streetName3 + "_" + locality)
 			.replace(".","")
 			.replace("'","");
 
