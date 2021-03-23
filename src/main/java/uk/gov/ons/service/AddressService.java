@@ -136,10 +136,10 @@ public class AddressService {
 		return addressRepository.saveAll(addresses);
 	}
 
-	public Flux<Address> createAuxAddressesFromCsv(List<ValidatedAddress<AuxAddress>> addresses) {
-		return Flux.fromIterable(addresses).parallel().runOn(Schedulers.elastic())
+	public Flux<Address> createAuxAddressesFromCsv(List<ValidatedAddress<AuxAddress>> addresses) {	
+		return Flux.fromIterable(addresses).limitRate(20)
 				.flatMap(validatedAddress -> addressRepository.saveAll(buildAddress(validatedAddress.getAddress())))
-				.sequential().doOnError(ex -> Flux.just("Error: " + ex.getMessage()));
+				.doOnError(ex -> Flux.just("Error: " + ex.getMessage()));
 	}
 
 	public Flux<HybridAddressSkinny> createSkinnyUnitAddressesFromCsv(List<ValidatedAddress<UnitAddress>> addresses) {
