@@ -76,6 +76,7 @@ public class CreateAddressController {
 			try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
 
 				CsvToBean<AuxAddress> csvToBean = new CsvToBeanBuilder<AuxAddress>(reader).withType(AuxAddress.class)
+						.withIgnoreEmptyLine(true)
 						.withIgnoreLeadingWhiteSpace(true).build();
 
 				List<ValidatedAddress<AuxAddress>> validatedAddresses = csvToBean.parse().stream()

@@ -89,7 +89,7 @@
 						</tr>
 					</tbody>
 				</table>
-				<p class="mt-5" th:if="${!addresses.empty}" th:text="${addressesSize}" />
+				<p class="mt-5" th:if="${addresses != null && !addresses.empty}" th:text="${addressesSize}" />
 
 				<h2 class="mt-5">Aux Address File Status - Invalid</h2>
 

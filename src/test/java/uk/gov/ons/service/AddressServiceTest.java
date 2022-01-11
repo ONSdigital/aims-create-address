@@ -32,17 +32,18 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
-import org.springframework.cloud.gcp.pubsub.support.AcknowledgeablePubsubMessage;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
+import com.google.cloud.spring.pubsub.support.AcknowledgeablePubsubMessage;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 
@@ -88,8 +89,9 @@ class AddressServiceTest {
 	private HybridAddressFatRepository fatRepository;
 	@Autowired
 	private HybridAddressSkinnyRepository skinnyRepository;
-
-	private final ElasticsearchContainer elastic;
+	
+    public static final DockerImageName ELASTIC_IMAGE = DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:7.9.3");
+	private final ElasticsearchContainer elastic = new ElasticsearchContainer(ELASTIC_IMAGE);
 
 	private static MockWebServer mockBackEnd;
 
@@ -287,7 +289,6 @@ class AddressServiceTest {
 	
 	public AddressServiceTest() throws IOException {
 
-		elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.9.3");
 		elastic.start();
 
 		System.setProperty("spring.elasticsearch.rest.uris",
