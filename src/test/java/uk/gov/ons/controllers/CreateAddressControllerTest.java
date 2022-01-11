@@ -5,44 +5,49 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(Lifecycle.PER_CLASS)
+@TestMethodOrder(OrderAnnotation.class)
 public class CreateAddressControllerTest {
 	
     @Autowired
     private WebTestClient client;
-	
-	private final ElasticsearchContainer elastic;
+    public static final DockerImageName ELASTIC_IMAGE = DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:7.9.3");
+	private final ElasticsearchContainer elastic = new ElasticsearchContainer(ELASTIC_IMAGE);
 	private static MockWebServer mockBackEnd;
-    
+
 	public CreateAddressControllerTest() throws IOException {
 		
 		/*
 		 *  Service is properly tested in AddressServiceTest.
 		 *  ES and MockWebServer required to stop exceptions.
 		 */
-		elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.9.3");
 		elastic.start();
 
 		System.setProperty("spring.elasticsearch.rest.uris",
-				elastic.getContainerIpAddress() + ":" + elastic.getFirstMappedPort());
+				elastic.getHost() + ":" + elastic.getFirstMappedPort());
 		System.setProperty("spring.data.elasticsearch.client.reactive.endpoints",
-				elastic.getContainerIpAddress() + ":" + elastic.getFirstMappedPort());
+				elastic.getHost() + ":" + elastic.getFirstMappedPort());
 		
 		mockBackEnd = new MockWebServer();
         mockBackEnd.start();
@@ -52,7 +57,7 @@ public class CreateAddressControllerTest {
       	mockBackEnd.enqueue(new MockResponse()
       	      .setBody("")
       	      .addHeader("Content-Type", "application/json"));
-	}	
+	}
 	
 	@AfterAll
 	public void tear() throws IOException {
@@ -63,6 +68,7 @@ public class CreateAddressControllerTest {
 	}
 	
 	@Test
+	@Order(value = 3)
 	void testIndex() {
 		client.get().uri("/")
 	        .exchange()
@@ -70,10 +76,11 @@ public class CreateAddressControllerTest {
 	}
 	
 	@Test 
+	@Order(value = 1)
 	void testUploadAuxAddresses() {
 		
 		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
-		multipartBodyBuilder.part("file", new ClassPathResource("aux-addresses-test.csv")).contentType(MediaType.MULTIPART_FORM_DATA);
+		multipartBodyBuilder.part("file", new ClassPathResource("aux-addresses-test-good.csv")).contentType(MediaType.MULTIPART_FORM_DATA);
 				
 		// Returns page showing addresses that were attempted to load to ES and bad addresses.
 		client.post().uri("/upload-csv-aux-file")
@@ -90,6 +97,7 @@ public class CreateAddressControllerTest {
 	}	
 	
 	@Test 
+	@Order(value = 2)
 	void testUploadUnitAddresses() {
 		
 		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();

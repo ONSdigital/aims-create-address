@@ -20,9 +20,9 @@ import uk.gov.ons.entities.AuxAddress;
 class ValidatedAddressTest {
 
 	@Test
-	void testAuxCSVValidation() {
+	void testAuxCSVValidationGood() {
 
-		File csvFile = new File("src/test/resources/aux-addresses-test.csv");
+		File csvFile = new File("src/test/resources/aux-addresses-test-good.csv");
 
 		try (Reader reader = new FileReader(csvFile)) {
 
@@ -39,13 +39,41 @@ class ValidatedAddressTest {
 					.filter(address -> !address.isValid()).collect(Collectors.toList());
 
 			assertEquals(2, validAddresses.size());
+			assertEquals(0, invalidAddresses.size());
+			// The correct rows are valid
+			assertEquals(List.of("1234567891011", "1234567891012"), validAddresses.stream()
+					.map(address -> address.getAddress().getUprn()).collect(Collectors.toList()));
+
+		} catch (Exception e) {
+			fail(e);
+		}
+
+	}
+	
+	@Test
+	void testAuxCSVValidationBad() {
+
+		File csvFile = new File("src/test/resources/aux-addresses-test-bad.csv");
+
+		try (Reader reader = new FileReader(csvFile)) {
+
+			CsvToBean<AuxAddress> csvToBean = new CsvToBeanBuilder<AuxAddress>(reader).withType(AuxAddress.class)
+					.withIgnoreLeadingWhiteSpace(true).build();
+
+			List<ValidatedAddress<AuxAddress>> validatedAddresses = csvToBean.parse().stream()
+					.map(address -> new ValidatedAddress<AuxAddress>(address)).collect(Collectors.toList());
+
+			List<ValidatedAddress<AuxAddress>> validAddresses = validatedAddresses.stream()
+					.filter(address -> address.isValid()).collect(Collectors.toList());
+
+			List<ValidatedAddress<AuxAddress>> invalidAddresses = validatedAddresses.stream()
+					.filter(address -> !address.isValid()).collect(Collectors.toList());
+
+			assertEquals(0, validAddresses.size());
 			assertEquals(2, invalidAddresses.size());
 			// The correct rows are invalid
 			assertEquals(List.of("99", "88"), invalidAddresses.stream().map(address -> address.getAddress().getUprn())
 					.collect(Collectors.toList()));
-			// The correct rows are valid
-			assertEquals(List.of("1234567891011", "1234567891012"), validAddresses.stream()
-					.map(address -> address.getAddress().getUprn()).collect(Collectors.toList()));
 
 			// The correct validation messages are linked to the correct rows - single
 			// validation error

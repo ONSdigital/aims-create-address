@@ -19,7 +19,7 @@ spring:
           endpoints: localhost:9200
   cloud:
     gcp:
-      project-id: YOUR_GCP_PROJECT_ID_HERE
+      project-id: YOUR-GCP-PROJECT-ID-HERE
   servlet:
     multipart:
       max-file-size: 100MB
@@ -60,7 +60,7 @@ aims:
   pubsub:
     subscription: new-address-subscription
   gcp:
-    bucket: YOUR_GCP_BUCKET_ID_HERE
+    bucket: YOUR-GCP-BUCKET-ID-HERE
   elasticsearch:
     cluster:
       fat-enabled: true
