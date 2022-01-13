@@ -7,7 +7,6 @@ import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveRestClients;
 import org.springframework.data.elasticsearch.repository.config.EnableReactiveElasticsearchRepositories;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
 
 import lombok.Getter;
 
@@ -39,13 +38,11 @@ public class Config {
 	@Bean
 	ReactiveElasticsearchClient client() {
 
-		ClientConfiguration clientConfiguration = ClientConfiguration.builder().connectedTo(elasticSearchEndpoint)
-				.withConnectTimeout(elasticConnectTimeout).withSocketTimeout(elasticSocketTimeout)
-				.withWebClientConfigurer(webClient -> {
-					ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
-							.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(-1)).build();
-					return webClient.mutate().exchangeStrategies(exchangeStrategies).build();
-				}).build();
+		ClientConfiguration clientConfiguration = ClientConfiguration.builder()
+				.connectedTo(elasticSearchEndpoint)
+				.withConnectTimeout(elasticConnectTimeout)
+				.withSocketTimeout(elasticSocketTimeout)
+				.build();
 
 		return ReactiveRestClients.create(clientConfiguration);
 	}
