@@ -1,13 +1,13 @@
 plugins {
-	id 'org.springframework.boot' version '2.6.2'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-	id "io.freefair.lombok" version "6.3.0"
+	id 'org.springframework.boot' version '3.3.5'
+	id 'io.spring.dependency-management' version '1.1.6'
+	id "io.freefair.lombok" version "8.6"
 	id 'java'
 }
 
 group = 'uk.gov.ons'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+sourceCompatibility = '21'
 
 repositories {
 	mavenCentral()
@@ -22,28 +22,28 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	
-	implementation 'com.google.cloud:spring-cloud-gcp-dependencies:2.0.6'
-	implementation 'com.google.cloud:spring-cloud-gcp-starter:2.0.6'
-	implementation 'com.google.cloud:spring-cloud-gcp-starter-pubsub:2.0.6'
-	implementation 'com.google.cloud:spring-cloud-gcp-starter-storage:2.0.6'
+	implementation 'com.google.cloud:spring-cloud-gcp-dependencies:5.8.0'
+	implementation 'com.google.cloud:spring-cloud-gcp-starter:5.8.0'
+	implementation 'com.google.cloud:spring-cloud-gcp-starter-pubsub:5.8.0'
+	implementation 'com.google.cloud:spring-cloud-gcp-starter-storage:5.8.0'
 	
 	implementation 'org.springframework.integration:spring-integration-core'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'com.opencsv:opencsv:5.5.2'
+	implementation 'com.opencsv:opencsv:5.9'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.projectlombok:lombok:1.18.22'
-	implementation 'io.micrometer:micrometer-registry-prometheus:1.8.1'
+	implementation 'org.projectlombok:lombok:1.18.36'
+	implementation 'io.micrometer:micrometer-registry-prometheus:1.14.1'
 		
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
-	testImplementation 'io.projectreactor:reactor-test:3.4.13'
-	testImplementation "org.testcontainers:elasticsearch:1.16.2"
-	testImplementation 'com.squareup.okhttp3:okhttp:4.9.3'
-	testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.3'
-	testImplementation 'org.springframework.cloud:spring-cloud-starter-bootstrap:3.1.0'
-	testImplementation 'com.playtika.testcontainers:embedded-google-pubsub:2.0.18'
+	testImplementation 'io.projectreactor:reactor-test:3.7.0'
+	testImplementation "org.testcontainers:elasticsearch:1.20.3"
+	testImplementation 'com.squareup.okhttp3:okhttp:4.12.0'
+	testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+	testImplementation 'org.springframework.cloud:spring-cloud-starter-bootstrap:4.1.4'
+	testImplementation 'com.playtika.testcontainers:embedded-google-pubsub:3.1.9'
 	// Resolves the java.lang.NoClassDefFoundError: org/junit/platform/engine/EngineDiscoveryListener in Eclipse	
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

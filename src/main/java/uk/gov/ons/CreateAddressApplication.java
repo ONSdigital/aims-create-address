@@ -2,6 +2,8 @@ package uk.gov.ons;
 
 import java.io.IOException;
 
+import co.elastic.clients.json.JsonpMapper;
+import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,8 @@ import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import com.google.cloud.spring.pubsub.support.GcpPubSubHeaders;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.elasticsearch.client.elc.ReactiveElasticsearchClient;
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.MessageChannel;
@@ -39,6 +43,18 @@ public class CreateAddressApplication {
 	
 	@Autowired
 	private AddressRepository addressRepository;
+
+	@Autowired
+	ReactiveElasticsearchOperations operations;
+
+	@Autowired
+	ReactiveElasticsearchClient elasticsearchClient;
+
+	@Autowired
+	RestClient restClient;
+
+	@Autowired
+	JsonpMapper jsonpMapper;
 
 	@Value("${spring.cloud.gcp.project-id}")
 	private String gcpProject;

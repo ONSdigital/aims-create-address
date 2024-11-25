@@ -10,23 +10,31 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
+import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+import co.elastic.clients.elasticsearch.indices.GetIndexRequest;
+import co.elastic.clients.json.JsonpMapper;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.CreateIndexRequest;
-import org.elasticsearch.client.indices.CreateIndexResponse;
-import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.common.xcontent.XContentType;
+//import org.elasticsearch.client.RestHighLevelClient;
+//import org.elasticsearch.client.indices.CreateIndexRequest;
+//import org.elasticsearch.client.indices.CreateIndexResponse;
+//import org.elasticsearch.client.indices.GetIndexRequest;
+//import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.WritableResource;
+import org.springframework.data.elasticsearch.client.elc.ReactiveElasticsearchClient;
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.annotation.Validated;
+//import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.opencsv.CSVWriter;
@@ -78,24 +86,35 @@ public class AddressService {
 	@Autowired
 	private ResourceLoader resourceLoader;
 
+	@Autowired
+	ReactiveElasticsearchOperations operations;
+
+	@Autowired
+	ReactiveElasticsearchClient elasticsearchClient;
+
+	@Autowired
+	RestClient restClient;
+
+
 	private static final String datePattern = "yyyyMMdd_HHmmss";
 	private DateTimeFormatter dateTimeFormater = DateTimeFormatter.ofPattern(datePattern);
 
 	@Autowired
-	public AddressService(RestHighLevelClient client, ResourceLoader resourceLoader, 
-			@Value("${aims.elasticsearch.index.aux.name}") String indexName,
-			@Value("${aims.tokeniser.uri}") String tokeniserEndpoint,
-			@Value("${aims.elasticsearch.cluster.fat-enabled}") boolean fatClusterEnabled,
-			WebClient.Builder webClientBuilder) {
+	public AddressService(ReactiveElasticsearchClient elasticsearchClient, ResourceLoader resourceLoader,
+						  @Value("${aims.elasticsearch.index.aux.name}") String indexName,
+						  @Value("${aims.tokeniser.uri}") String tokeniserEndpoint,
+						  @Value("${aims.elasticsearch.cluster.fat-enabled}") boolean fatClusterEnabled,
+						  WebClient.Builder webClientBuilder) {
 		
 		this.webClient = webClientBuilder.clientConnector((ClientHttpConnector)new ReactorClientHttpConnector(HttpClient.create()
 				.wiretap(true))).baseUrl(tokeniserEndpoint).build();
 		
 		if (fatClusterEnabled) {
-			GetIndexRequest request = new GetIndexRequest(indexName);
+		//	GetIndexRequest request = new GetIndexRequest(indexName);
+			GetIndexRequest request = new GetIndexRequest.Builder().index(indexName).build();
 
 			try {
-				if (!client.indices().exists(request, RequestOptions.DEFAULT)) {
+				if (!elasticsearchClient.indices().exists(request, RequestOptions.DEFAULT)) {
 					try (Reader mappingReader = new InputStreamReader(
 							resourceLoader.getResource("classpath:mappings.json").getInputStream(),
 							Charset.forName("UTF-8"));
