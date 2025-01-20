@@ -12,6 +12,7 @@ import java.util.List;
 
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+import co.elastic.clients.elasticsearch.indices.ExistsRequest;
 import co.elastic.clients.elasticsearch.indices.GetIndexRequest;
 import co.elastic.clients.json.JsonpMapper;
 import org.elasticsearch.client.RequestOptions;
@@ -114,7 +115,8 @@ public class AddressService {
 			GetIndexRequest request = new GetIndexRequest.Builder().index(indexName).build();
 
 			try {
-				if (!elasticsearchClient.indices().exists(request, RequestOptions.DEFAULT)) {
+			//	if (!elasticsearchClient.indices().exists(request, RequestOptions.DEFAULT)) {
+					if (Boolean.FALSE.equals(elasticsearchClient.indices().exists(ExistsRequest.of(e -> e.index(indexName))).flatMap(response -> Mono.just(response.value())).block()))
 					try (Reader mappingReader = new InputStreamReader(
 							resourceLoader.getResource("classpath:mappings.json").getInputStream(),
 							Charset.forName("UTF-8"));
@@ -126,7 +128,7 @@ public class AddressService {
 
 						createRequest.settings(FileCopyUtils.copyToString(settingsReader), XContentType.JSON);
 						createRequest.mapping(FileCopyUtils.copyToString(mappingReader), XContentType.JSON);
-						CreateIndexResponse createIndexResponse = client.indices().create(createRequest,
+						CreateIndexResponse createIndexResponse = elasticsearchClient.indices().create(createRequest,
 								RequestOptions.DEFAULT);
 
 						if (!createIndexResponse.isAcknowledged()) {
