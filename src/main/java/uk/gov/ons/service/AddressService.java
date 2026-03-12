@@ -20,7 +20,7 @@ import org.elasticsearch.client.RequestOptions;
 //import org.elasticsearch.client.indices.CreateIndexRequest;
 //import org.elasticsearch.client.indices.CreateIndexResponse;
 //import org.elasticsearch.client.indices.GetIndexRequest;
-//import org.elasticsearch.common.xcontent.XContentType;
+//import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -115,7 +115,7 @@ public class AddressService {
 			GetIndexRequest request = new GetIndexRequest.Builder().index(indexName).build();
 
 			try {
-			//	if (!elasticsearchClient.indices().exists(request, RequestOptions.DEFAULT)) {
+			    if (!elasticsearchClient.indices().exists(request, RequestOptions.DEFAULT)) {
 					if (Boolean.FALSE.equals(elasticsearchClient.indices().exists(ExistsRequest.of(e -> e.index(indexName))).flatMap(response -> Mono.just(response.value())).block()))
 					try (Reader mappingReader = new InputStreamReader(
 							resourceLoader.getResource("classpath:mappings.json").getInputStream(),
@@ -125,7 +125,7 @@ public class AddressService {
 									Charset.forName("UTF-8"))) {
 
 						CreateIndexRequest createRequest = new CreateIndexRequest(indexName);
-
+// application/json
 						createRequest.settings(FileCopyUtils.copyToString(settingsReader), XContentType.JSON);
 						createRequest.mapping(FileCopyUtils.copyToString(mappingReader), XContentType.JSON);
 						CreateIndexResponse createIndexResponse = elasticsearchClient.indices().create(createRequest,
