@@ -4,15 +4,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
-import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
-import org.springframework.data.elasticsearch.client.reactive.ReactiveRestClients;
+import org.springframework.data.elasticsearch.client.elc.ReactiveElasticsearchConfiguration;
 import org.springframework.data.elasticsearch.repository.config.EnableReactiveElasticsearchRepositories;
 
 import lombok.Getter;
 
 @Configuration
 @EnableReactiveElasticsearchRepositories
-public class Config {
+public class Config extends ReactiveElasticsearchConfiguration {
 	
 	@Value("${spring.elasticsearch.rest.uris}")
 	private String elasticSearchEndpoint;
@@ -34,16 +33,13 @@ public class Config {
 	
 	@Value("${aims.elasticsearch.client.connect-timeout}")
 	private long elasticConnectTimeout;
-	
-	@Bean
-	ReactiveElasticsearchClient client() {
 
-		ClientConfiguration clientConfiguration = ClientConfiguration.builder()
+	@Override
+	public ClientConfiguration clientConfiguration() {
+		return ClientConfiguration.builder() //
 				.connectedTo(elasticSearchEndpoint)
 				.withConnectTimeout(elasticConnectTimeout)
 				.withSocketTimeout(elasticSocketTimeout)
 				.build();
-
-		return ReactiveRestClients.create(clientConfiguration);
 	}
 }

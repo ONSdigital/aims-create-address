@@ -3,8 +3,8 @@ package uk.gov.ons.entities;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 
 import com.opencsv.bean.CsvBindByName;
 
