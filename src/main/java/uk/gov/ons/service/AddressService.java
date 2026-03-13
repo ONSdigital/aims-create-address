@@ -10,17 +10,20 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
-import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
-import co.elastic.clients.elasticsearch.indices.ExistsRequest;
-import co.elastic.clients.elasticsearch.indices.GetIndexRequest;
+//import org.json.simple.JSONObject;
+import co.elastic.clients.elasticsearch._types.mapping.TypeMapping;
+import co.elastic.clients.elasticsearch.core.GetRequest;
+import co.elastic.clients.elasticsearch.indices.*;
 import co.elastic.clients.json.JsonpMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.elasticsearch.client.RequestOptions;
 //import org.elasticsearch.client.RestHighLevelClient;
 //import org.elasticsearch.client.indices.CreateIndexRequest;
 //import org.elasticsearch.client.indices.CreateIndexResponse;
 //import org.elasticsearch.client.indices.GetIndexRequest;
 //import org.elasticsearch.xcontent.XContentType;
+//import org.springframework.data.elastics
 import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -111,11 +114,8 @@ public class AddressService {
 				.wiretap(true))).baseUrl(tokeniserEndpoint).build();
 		
 		if (fatClusterEnabled) {
-		//	GetIndexRequest request = new GetIndexRequest(indexName);
-			GetIndexRequest request = new GetIndexRequest.Builder().index(indexName).build();
-
 			try {
-			    if (!elasticsearchClient.indices().exists(request, RequestOptions.DEFAULT)) {
+			    if (elasticsearchClient.indices().exists(ExistsRequest.of(e -> e.index(indexName))).equals(false)) {
 					if (Boolean.FALSE.equals(elasticsearchClient.indices().exists(ExistsRequest.of(e -> e.index(indexName))).flatMap(response -> Mono.just(response.value())).block()))
 					try (Reader mappingReader = new InputStreamReader(
 							resourceLoader.getResource("classpath:mappings.json").getInputStream(),
@@ -124,24 +124,29 @@ public class AddressService {
 									resourceLoader.getResource("classpath:settings.json").getInputStream(),
 									Charset.forName("UTF-8"))) {
 
-						CreateIndexRequest createRequest = new CreateIndexRequest(indexName);
-// application/json
-						createRequest.settings(FileCopyUtils.copyToString(settingsReader), XContentType.JSON);
-						createRequest.mapping(FileCopyUtils.copyToString(mappingReader), XContentType.JSON);
-						CreateIndexResponse createIndexResponse = elasticsearchClient.indices().create(createRequest,
-								RequestOptions.DEFAULT);
 
-						if (!createIndexResponse.isAcknowledged()) {
-							log.error(String.format("Can not create index %s", indexName));
-							throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName));
-						}
+						TypeMapping tm = new TypeMapping.Builder().withJson(mappingReader).build();
+						IndexSettings is = new IndexSettings.Builder().withJson(settingsReader).build();
+						CreateIndexRequest createRequest = CreateIndexRequest.of(builder -> builder.index(indexName).settings(is).mappings(tm));
+						Mono<CreateIndexResponse> CreateResult = elasticsearchClient.indices().create(createRequest).
+						doOnError(throwable -> log.error(String.format("Can not create index %s", indexName)));
+
+//								log.error(String.format("Can not create index %s", indexName)))
+//						throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName)););
+//CreateResult
+//		.doOnSuccess(aVoid -> logger.info("Created Index {}", MYMODEL_ES_INDEX))
+//		.doOnError(throwable -> logger.error(throwable.getMessage(), throwable));
+//
+//					if (!createIndexResponse.isAcknowledged()) {
+//
+//						}
 
 					} catch (IOException ioe) {
 						log.error(String.format("Can not create index %s", indexName), ioe);
 						throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName), ioe);
 					}
 				}
-			} catch (IOException ioe) {
+			} catch (Exception ioe) {
 				log.error(String.format("Can not create index %s", indexName), ioe);
 				throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName), ioe);
 			}
