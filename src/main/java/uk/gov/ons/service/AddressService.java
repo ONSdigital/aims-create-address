@@ -33,6 +33,7 @@ import org.springframework.core.io.WritableResource;
 import org.springframework.data.elasticsearch.client.elc.ReactiveElasticsearchClient;
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
@@ -214,9 +215,9 @@ public class AddressService {
 
 		return webClient.get().uri(path, unitAddress.getAddressAll())
 				.retrieve()
-				.onStatus(HttpStatus::is4xxClientError, response -> 
+				.onStatus(HttpStatusCode::is4xxClientError, response ->
 					Mono.error(new CreateAddressRuntimeException("Client error")))
-				.onStatus(HttpStatus::is5xxServerError, response -> 
+				.onStatus(HttpStatusCode::is5xxServerError, response ->
 					Mono.error(new CreateAddressRuntimeException("Server error")))
 				.bodyToMono(TokeniserResponse.class)
 				.timeout(Duration.ofSeconds(5))
@@ -233,9 +234,9 @@ public class AddressService {
 
 		return webClient.get().uri(path, unitAddress.getAddressAll())
 				.retrieve()
-				.onStatus(HttpStatus::is4xxClientError, response -> 
+				.onStatus(HttpStatusCode::is4xxClientError, response ->
 					Mono.error(new CreateAddressRuntimeException("Client error")))
-				.onStatus(HttpStatus::is5xxServerError, response -> 
+				.onStatus(HttpStatusCode::is5xxServerError, response ->
 					Mono.error(new CreateAddressRuntimeException("Server error")))
 				.bodyToMono(TokeniserResponse.class)
 				.timeout(Duration.ofSeconds(5))
