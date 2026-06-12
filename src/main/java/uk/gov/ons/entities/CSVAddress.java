@@ -29,7 +29,7 @@ public @Data class CSVAddress extends InputAddress {
 	@Override
 	public List<String> getRow() {
 		
-		List<String> contents = new ArrayList<String>(super.getRow()); 
+		List<String> contents = new ArrayList<>(super.getRow());
 		contents.addAll(List.of( this.oa, this.lsoa, this.msoa, this.lad ));
 
 		return contents;
@@ -37,7 +37,7 @@ public @Data class CSVAddress extends InputAddress {
 	
 	@Override
 	public List<String> getHeader() {
-		List<String> header = new ArrayList<String>(super.getHeader()); 
+		List<String> header = new ArrayList<>(super.getHeader());
 		header.addAll(List.of("OA", "LSOA", "MSOA", "LAD"));
 		return header;
 	}

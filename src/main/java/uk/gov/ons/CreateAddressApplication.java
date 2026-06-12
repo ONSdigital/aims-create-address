@@ -88,7 +88,9 @@ public class CreateAddressApplication {
 	public MessageHandler messageReceiver() {
 		return message -> {
 			log.debug("Message arrived! Payload: " + new String((byte[]) message.getPayload()));
-			
+			BasicAcknowledgeablePubsubMessage originalMessage = message.getHeaders()
+					.get(GcpPubSubHeaders.ORIGINAL_MESSAGE, BasicAcknowledgeablePubsubMessage.class);
+
 			try {
 				Message msg = new ObjectMapper().setDefaultSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY)).readValue((byte[]) message.getPayload(), Message.class);
 				log.debug(String.format("Message: %s", msg.toString()));
@@ -99,16 +101,22 @@ public class CreateAddressApplication {
 							if (response != null) {
 								
 								// Show ES Content for new Address - DEMO
-								addressRepository.findById(String.valueOf(response.getUprn())).subscribe(address -> {
-									log.debug(String.format("ES content for new address with ID: %s = %s", response.getUprn(), address.toString()));
-								});
-								
+								addressRepository.findById(String.valueOf(response.getUprn())).subscribe(
+										address -> log.debug(String.format("ES content for new address with ID: %s = %s", response.getUprn(), address.toString())),
+										ex -> log.warn("Unable to read ES content for new address with ID: {}: {}", response.getUprn(), ex.toString()));
+
 								// Send ACK
-								BasicAcknowledgeablePubsubMessage originalMessage = message.getHeaders()
-										.get(GcpPubSubHeaders.ORIGINAL_MESSAGE, BasicAcknowledgeablePubsubMessage.class);
-								originalMessage.ack();	
+								if (originalMessage != null) {
+									originalMessage.ack();
+								}
 							}
 							log.debug(String.format("Response: %s",  response != null ? response.toString() : "Response is null!"));
+						},
+						ex -> {
+							log.warn("Unable to process PubSub message: {}", ex.toString());
+							if (originalMessage != null) {
+								originalMessage.nack();
+							}
 						});
 			} catch (IOException e) {
 				log.info(String.format("Unable to read message: %s", e));
@@ -116,9 +124,9 @@ public class CreateAddressApplication {
 				log.info(String.format("Unable to read message: %s", cae));
 				
 				// Send NACK
-				BasicAcknowledgeablePubsubMessage originalMessage = message.getHeaders()
-						.get(GcpPubSubHeaders.ORIGINAL_MESSAGE, BasicAcknowledgeablePubsubMessage.class);
-				originalMessage.nack();	
+				if (originalMessage != null) {
+					originalMessage.nack();
+				}
 			}
 		};
 	}

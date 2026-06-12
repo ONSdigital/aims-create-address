@@ -68,8 +68,8 @@ public @Data class Lpi extends LpiSkinny {
 		setMixedNag(this.getMixedNag());
 		setMixedNagStart(this.getMixedNagStart()); // keyword
 		setNagAll(this.getNagAll());
-		setLocation(new Point(super.parseStringToOptionalDouble(builder.latitude).orElse(0.0),
-				super.parseStringToOptionalDouble(builder.longitude).orElse(0.0)));
+		setLocation(new Point(parseStringToOptionalDouble(builder.latitude).orElse(0.0),
+				parseStringToOptionalDouble(builder.longitude).orElse(0.0)));
 	}
 	
 	public String getMixedNag() {

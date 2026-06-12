@@ -80,12 +80,12 @@ public class CreateAddressController {
 						.withIgnoreLeadingWhiteSpace(true).build();
 
 				List<ValidatedAddress<AuxAddress>> validatedAddresses = csvToBean.parse().stream()
-						.map(address -> new ValidatedAddress<AuxAddress>(address)).collect(Collectors.toList());
+						.map(ValidatedAddress::new).toList();
 
 				List<ValidatedAddress<AuxAddress>> invalidAddresses = validatedAddresses.stream()
 						.filter(address -> !address.isValid()).collect(Collectors.toList());
 
-				if (invalidAddresses.size() > 0) {
+				if (!invalidAddresses.isEmpty()) {
 					model.addAttribute("badAddressCSVPath", String.format("Bad addresss file name: %s. In bucket: %s",
 							addressService.writeBadAddressesCsv(invalidAddresses, BAD_AUX_ADDRESS_FILE_NAME), gcsBucket));
 					model.addAttribute("badAddresses", invalidAddresses.stream().limit(displayLimit).collect(Collectors.toList()));
@@ -93,9 +93,9 @@ public class CreateAddressController {
 				}
 
 				List<ValidatedAddress<AuxAddress>> validAddresses = validatedAddresses.stream()
-						.filter(address -> address.isValid()).collect(Collectors.toList());
+						.filter(ValidatedAddress::isValid).collect(Collectors.toList());
 
-				if (validAddresses.size() > 0) {
+				if (!validAddresses.isEmpty()) {
 					model.addAttribute("addresses", validAddresses.stream().limit(displayLimit).collect(Collectors.toList()));
 					model.addAttribute("addressesSize", String.format("Total valid aux addresses: %d", validAddresses.size()));
 
@@ -110,7 +110,10 @@ public class CreateAddressController {
 						 * example an illegal lat or long will cause the load to fail from that point.
 						 * Needs very clean input data.
 						 */
-					}).subscribe();
+					}).subscribe(
+						output -> {
+						},
+						ex -> log.warn("Failed to process aux CSV upload: {}", ex.toString()));
 				}
 
 				model.addAttribute("status", true);
@@ -145,12 +148,12 @@ public class CreateAddressController {
 						.withSeparator('|').build();
 
 				List<ValidatedAddress<UnitAddress>> validatedAddresses = csvToBean.parse().stream()
-						.map(address -> new ValidatedAddress<UnitAddress>(address)).collect(Collectors.toList());
+						.map(ValidatedAddress::new).toList();
 
 				List<ValidatedAddress<UnitAddress>> invalidAddresses = validatedAddresses.stream()
 						.filter(address -> !address.isValid()).collect(Collectors.toList());
 
-				if (invalidAddresses.size() > 0) {
+				if (!invalidAddresses.isEmpty()) {
 					model.addAttribute("badAddressCSVPath", String.format("Bad addresss file name: %s. In bucket: %s",
 							addressService.writeBadAddressesCsv(invalidAddresses, BAD_UNIT_ADDRESS_FILE_NAME), gcsBucket));
 					model.addAttribute("badAddresses", invalidAddresses.stream().limit(displayLimit).collect(Collectors.toList()));
@@ -158,9 +161,9 @@ public class CreateAddressController {
 				}
 
 				List<ValidatedAddress<UnitAddress>> validAddresses = validatedAddresses.stream()
-						.filter(address -> address.isValid()).collect(Collectors.toList());
+						.filter(ValidatedAddress::isValid).collect(Collectors.toList());
 
-				if (validAddresses.size() > 0) {
+				if (!validAddresses.isEmpty()) {
 					model.addAttribute("addresses", validAddresses.stream().limit(displayLimit).collect(Collectors.toList()));
 					model.addAttribute("addressesSize", String.format("Total valid unit addresses: %d", validAddresses.size()));
 
@@ -173,11 +176,17 @@ public class CreateAddressController {
 					if (fatClusterEnabled) {
 						addressService.createFatUnitAddressesFromCsv(validAddresses).doOnNext(output -> {
 							log.debug(String.format("Added: %s", output.toString()));
-						}).subscribe();
+						}).subscribe(
+							output -> {
+							},
+							ex -> log.warn("Failed to process unit CSV upload (fat): {}", ex.toString()));
 					} else {
 						addressService.createSkinnyUnitAddressesFromCsv(validAddresses).doOnNext(output -> {
 							log.debug(String.format("Added: %s", output.toString()));
-						}).subscribe();
+						}).subscribe(
+							output -> {
+							},
+							ex -> log.warn("Failed to process unit CSV upload (skinny): {}", ex.toString()));
 					}
 				}
 				

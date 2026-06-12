@@ -131,10 +131,10 @@ public @Data class LpiSkinny {
 	}
 
 	public String getMixedNag() {
-		return Stream.of(
-				Stream.of(this.organisation, this.addressLine1, this.addressLine2, this.addressLine3, this.townNameUnitAddress,
-						this.postcode).filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(", ")),
-				this.postcode.replaceAll(" ", "")).collect(Collectors.joining(" "));
+		return String.join(" ",
+                Stream.of(this.organisation, this.addressLine1, this.addressLine2, this.addressLine3, this.townNameUnitAddress,
+                        this.postcode).filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining(", ")),
+                this.postcode.replace(" ", ""));
 	}
 
 	public String getMixedNagStart() {

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.validation.ConstraintViolation;
 import org.junit.jupiter.api.Test;
 
 import com.opencsv.bean.CsvToBean;
@@ -30,13 +31,13 @@ class ValidatedAddressTest {
 					.withIgnoreLeadingWhiteSpace(true).build();
 
 			List<ValidatedAddress<AuxAddress>> validatedAddresses = csvToBean.parse().stream()
-					.map(address -> new ValidatedAddress<AuxAddress>(address)).collect(Collectors.toList());
+					.map(ValidatedAddress::new).toList();
 
 			List<ValidatedAddress<AuxAddress>> validAddresses = validatedAddresses.stream()
-					.filter(address -> address.isValid()).collect(Collectors.toList());
+					.filter(ValidatedAddress::isValid).toList();
 
 			List<ValidatedAddress<AuxAddress>> invalidAddresses = validatedAddresses.stream()
-					.filter(address -> !address.isValid()).collect(Collectors.toList());
+					.filter(address -> !address.isValid()).toList();
 
 			assertEquals(2, validAddresses.size());
 			assertEquals(0, invalidAddresses.size());
@@ -61,13 +62,13 @@ class ValidatedAddressTest {
 					.withIgnoreLeadingWhiteSpace(true).build();
 
 			List<ValidatedAddress<AuxAddress>> validatedAddresses = csvToBean.parse().stream()
-					.map(address -> new ValidatedAddress<AuxAddress>(address)).collect(Collectors.toList());
+					.map(ValidatedAddress::new).toList();
 
 			List<ValidatedAddress<AuxAddress>> validAddresses = validatedAddresses.stream()
-					.filter(address -> address.isValid()).collect(Collectors.toList());
+					.filter(ValidatedAddress::isValid).toList();
 
 			List<ValidatedAddress<AuxAddress>> invalidAddresses = validatedAddresses.stream()
-					.filter(address -> !address.isValid()).collect(Collectors.toList());
+					.filter(address -> !address.isValid()).toList();
 
 			assertEquals(0, validAddresses.size());
 			assertEquals(2, invalidAddresses.size());
@@ -80,9 +81,9 @@ class ValidatedAddressTest {
 			assertEquals(Set.of("LONGITUDE cannot be greater than 180"), 
 					invalidAddresses.stream()
 						.filter(address -> address.getAddress().getUprn().equals("99"))
-						.map(violations -> violations.getViolations())
+						.map(ValidatedAddress::getViolations)
 						.flatMap(violations -> violations.stream()
-								.map(violation -> violation.getMessage())).collect(Collectors.toSet()));
+								.map(ConstraintViolation::getMessage)).collect(Collectors.toSet()));
 
 			// The correct validation messages are linked to the correct rows - multiple
 			// validation errors
@@ -90,9 +91,9 @@ class ValidatedAddressTest {
 					"POSTCODE is mandatory", "MSOA is mandatory"),
 					invalidAddresses.stream()
 						.filter(address -> address.getAddress().getUprn().equals("88"))
-						.map(violations -> violations.getViolations())
+						.map(ValidatedAddress::getViolations)
 						.flatMap(violations -> violations.stream()
-								.map(violation -> violation.getMessage())).collect(Collectors.toSet()));
+								.map(ConstraintViolation::getMessage)).collect(Collectors.toSet()));
 
 		} catch (Exception e) {
 			fail(e);

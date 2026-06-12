@@ -1,5 +1,6 @@
 package uk.gov.ons.repository.skinny;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,5 +13,5 @@ public interface HybridAddressSkinnyRepository extends ReactiveCrudRepository<Hy
 	
 	Flux<HybridAddressSkinny> findByLpiNagAllContaining(String search);
 	
-	Mono<HybridAddressSkinny> findById(String id);
+	Mono<HybridAddressSkinny> findById(@NonNull String id);
 }

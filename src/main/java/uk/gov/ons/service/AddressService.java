@@ -1,29 +1,12 @@
 package uk.gov.ons.service;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.nio.charset.Charset;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
-//import org.json.simple.JSONObject;
 import co.elastic.clients.elasticsearch._types.mapping.TypeMapping;
-import co.elastic.clients.elasticsearch.core.GetRequest;
-import co.elastic.clients.elasticsearch.indices.*;
-import co.elastic.clients.json.JsonpMapper;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.elasticsearch.client.RequestOptions;
-//import org.elasticsearch.client.RestHighLevelClient;
-//import org.elasticsearch.client.indices.CreateIndexRequest;
-//import org.elasticsearch.client.indices.CreateIndexResponse;
-//import org.elasticsearch.client.indices.GetIndexRequest;
-//import org.elasticsearch.xcontent.XContentType;
-//import org.springframework.data.elastics
+import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
+import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+import co.elastic.clients.elasticsearch.indices.ExistsRequest;
+import co.elastic.clients.elasticsearch.indices.IndexSettings;
+import com.opencsv.CSVWriter;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,29 +15,16 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.WritableResource;
 import org.springframework.data.elasticsearch.client.elc.ReactiveElasticsearchClient;
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.annotation.Validated;
-//import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import com.opencsv.CSVWriter;
-
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
-import uk.gov.ons.entities.Address;
-import uk.gov.ons.entities.AuxAddress;
-import uk.gov.ons.entities.HybridAddressFat;
-import uk.gov.ons.entities.HybridAddressSkinny;
-import uk.gov.ons.entities.InputAddress;
-import uk.gov.ons.entities.UnitAddress;
+import uk.gov.ons.entities.*;
 import uk.gov.ons.exception.CreateAddressException;
 import uk.gov.ons.exception.CreateAddressRuntimeException;
 import uk.gov.ons.json.TokeniserResponse;
@@ -66,200 +36,203 @@ import uk.gov.ons.util.HybridAddressFatMapper;
 import uk.gov.ons.util.HybridAddressSkinnyMapper;
 import uk.gov.ons.util.ValidatedAddress;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 @Slf4j
 @Service
 @Validated
 public class AddressService {
 
-	@Autowired
-	private AddressRepository addressRepository;
-	
-	@Autowired
-	private HybridAddressFatRepository hybridAddressFatRepository;
-	
-	@Autowired
-	private HybridAddressSkinnyRepository hybridAddressSkinnyRepository;
+    @Autowired
+    private AddressRepository addressRepository;
 
-	private final WebClient webClient;
+    @Autowired
+    private HybridAddressFatRepository hybridAddressFatRepository;
 
-	@Value("${aims.tokeniser.path}")
-	private String path;
+    @Autowired
+    private HybridAddressSkinnyRepository hybridAddressSkinnyRepository;
 
-	@Value("gs://${aims.gcp.bucket}/")
-	private String gcsBucket;
+    private final WebClient webClient;
 
-	@Autowired
-	private ResourceLoader resourceLoader;
+    @Value("${aims.tokeniser.path}")
+    private String path;
 
-	@Autowired
-	ReactiveElasticsearchOperations operations;
+    @Value("gs://${aims.gcp.bucket}/")
+    private String gcsBucket;
 
-	@Autowired
-	ReactiveElasticsearchClient elasticsearchClient;
+    @Autowired
+    private ResourceLoader resourceLoader;
 
-	@Autowired
-	RestClient restClient;
+    @Autowired
+    ReactiveElasticsearchOperations operations;
 
+    @Autowired
+    ReactiveElasticsearchClient elasticsearchClient;
 
-	private static final String datePattern = "yyyyMMdd_HHmmss";
-	private DateTimeFormatter dateTimeFormater = DateTimeFormatter.ofPattern(datePattern);
-
-	@Autowired
-	public AddressService(ReactiveElasticsearchClient elasticsearchClient, ResourceLoader resourceLoader,
-						  @Value("${aims.elasticsearch.index.aux.name}") String indexName,
-						  @Value("${aims.tokeniser.uri}") String tokeniserEndpoint,
-						  @Value("${aims.elasticsearch.cluster.fat-enabled}") boolean fatClusterEnabled,
-						  WebClient.Builder webClientBuilder) {
-		
-		this.webClient = webClientBuilder.clientConnector((ClientHttpConnector)new ReactorClientHttpConnector(HttpClient.create()
-				.wiretap(true))).baseUrl(tokeniserEndpoint).build();
-		
-		if (fatClusterEnabled) {
-			try {
-			    if (elasticsearchClient.indices().exists(ExistsRequest.of(e -> e.index(indexName))).equals(false)) {
-					if (Boolean.FALSE.equals(elasticsearchClient.indices().exists(ExistsRequest.of(e -> e.index(indexName))).flatMap(response -> Mono.just(response.value())).block()))
-					try (Reader mappingReader = new InputStreamReader(
-							resourceLoader.getResource("classpath:mappings.json").getInputStream(),
-							Charset.forName("UTF-8"));
-							Reader settingsReader = new InputStreamReader(
-									resourceLoader.getResource("classpath:settings.json").getInputStream(),
-									Charset.forName("UTF-8"))) {
+    @Autowired
+    RestClient restClient;
 
 
-						TypeMapping tm = new TypeMapping.Builder().withJson(mappingReader).build();
-						IndexSettings is = new IndexSettings.Builder().withJson(settingsReader).build();
-						CreateIndexRequest createRequest = CreateIndexRequest.of(builder -> builder.index(indexName).settings(is).mappings(tm));
-						Mono<CreateIndexResponse> CreateResult = elasticsearchClient.indices().create(createRequest).
-						doOnError(throwable -> log.error(String.format("Can not create index %s", indexName)));
+    private static final String datePattern = "yyyyMMdd_HHmmss";
+    private final DateTimeFormatter dateTimeFormater = DateTimeFormatter.ofPattern(datePattern);
 
-//								log.error(String.format("Can not create index %s", indexName)))
-//						throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName)););
-//CreateResult
-//		.doOnSuccess(aVoid -> logger.info("Created Index {}", MYMODEL_ES_INDEX))
-//		.doOnError(throwable -> logger.error(throwable.getMessage(), throwable));
-//
-//					if (!createIndexResponse.isAcknowledged()) {
-//
-//						}
+    @Autowired
+    public AddressService(ReactiveElasticsearchClient elasticsearchClient, ResourceLoader resourceLoader,
+                          @Value("${aims.elasticsearch.index.aux.name}") String indexName,
+                          @Value("${aims.tokeniser.uri}") String tokeniserEndpoint,
+                          @Value("${aims.elasticsearch.cluster.fat-enabled}") boolean fatClusterEnabled,
+                          WebClient.Builder webClientBuilder) {
 
-					} catch (IOException ioe) {
-						log.error(String.format("Can not create index %s", indexName), ioe);
-						throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName), ioe);
-					}
-				}
-			} catch (Exception ioe) {
-				log.error(String.format("Can not create index %s", indexName), ioe);
-				throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName), ioe);
-			}
-		}
-	}
+        this.webClient = webClientBuilder.clientConnector((ClientHttpConnector) new ReactorClientHttpConnector(HttpClient.create()
+                .wiretap(true))).baseUrl(tokeniserEndpoint).build();
 
-	public Mono<Address> createAddress(Address address) {
-		return addressRepository.save(address);
+        if (fatClusterEnabled) {
+            try {
+                if (elasticsearchClient.indices().exists(ExistsRequest.of(e -> e.index(indexName))).equals(false)) {
+                    if (Boolean.FALSE.equals(elasticsearchClient.indices().exists(ExistsRequest.of(e -> e.index(indexName))).flatMap(response -> Mono.just(response.value())).block()))
+                        try (Reader mappingReader = new InputStreamReader(
+                                resourceLoader.getResource("classpath:mappings.json").getInputStream(),
+                                StandardCharsets.UTF_8);
+                             Reader settingsReader = new InputStreamReader(
+                                     resourceLoader.getResource("classpath:settings.json").getInputStream(),
+                                     StandardCharsets.UTF_8)) {
 
-	}
 
-	public Flux<Address> createAddresses(List<Address> addresses) {
-		return addressRepository.saveAll(addresses);
-	}
+                            TypeMapping tm = new TypeMapping.Builder().withJson(mappingReader).build();
+                            IndexSettings is = new IndexSettings.Builder().withJson(settingsReader).build();
+                            CreateIndexRequest createRequest = CreateIndexRequest.of(builder -> builder.index(indexName).settings(is).mappings(tm));
+                            Mono<CreateIndexResponse> CreateResult = elasticsearchClient.indices().create(createRequest).
+                                    doOnError(throwable -> log.error(String.format("Can not create index %s", indexName)));
+                        } catch (IOException ioe) {
+                            log.error(String.format("Can not create index %s", indexName), ioe);
+                            throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName), ioe);
+                        }
+                }
+            } catch (Exception ioe) {
+                log.error(String.format("Can not create index %s", indexName), ioe);
+                throw new CreateAddressRuntimeException(String.format("Can not create index %s", indexName), ioe);
+            }
+        }
+    }
 
-	public Flux<Address> createAuxAddressesFromCsv(List<ValidatedAddress<AuxAddress>> addresses) {	
-		return Flux.fromIterable(addresses).limitRate(20)
-				.flatMap(validatedAddress -> addressRepository.saveAll(buildAddress(validatedAddress.getAddress())))
-				.doOnError(ex -> Flux.just("Error: " + ex.getMessage()));
-	}
+    public Mono<Address> createAddress(Address address) {
+        return addressRepository.save(address);
 
-	public Flux<HybridAddressSkinny> createSkinnyUnitAddressesFromCsv(List<ValidatedAddress<UnitAddress>> addresses) {
-		return Flux.fromIterable(addresses).limitRate(20)
-				.flatMap(validatedAddress -> hybridAddressSkinnyRepository.saveAll(buildHybridAddressSkinny(validatedAddress.getAddress())))
-				.doOnError(ex -> Flux.just("Error: " + ex.getMessage()));
-	}
-	
-	public Flux<HybridAddressFat> createFatUnitAddressesFromCsv(List<ValidatedAddress<UnitAddress>> addresses) {	
-		
-		return Flux.fromIterable(addresses).limitRate(20)
-				.flatMap(validatedAddress -> hybridAddressFatRepository.saveAll(buildHybridAddressFat(validatedAddress.getAddress())))
-				.doOnError(ex -> Flux.just("Error: " + ex.getMessage()));
-	}
+    }
 
-	public Mono<Address> createAddressFromMsg(InputAddress pubSubAddress) throws CreateAddressException {
+    public Flux<Address> createAddresses(List<Address> addresses) {
+        return addressRepository.saveAll(addresses);
+    }
 
-		/*
-		 * Can't @Valid the InputAddress for a PubSub msg as it can have legitimate
-		 * empty fields e.g. lat/long. Only UPRN is mandatory.
-		 */
-		if (pubSubAddress.getUprn().isBlank()) {
-			throw new CreateAddressException("UPRN is mandatory.");
-		}
+    public Flux<Address> createAuxAddressesFromCsv(List<ValidatedAddress<AuxAddress>> addresses) {
+        return Flux.fromIterable(addresses).limitRate(20)
+                .flatMap(validatedAddress -> addressRepository.saveAll(buildAddress(validatedAddress.getAddress()))
+                        .onErrorResume(ex -> {
+                            log.warn("Skipping aux address due to error: {}", ex.toString());
+                            return Flux.empty();
+                        }));
+    }
 
-		return buildAddress(pubSubAddress).flatMap(address -> addressRepository.save(address))
-				.doOnError(ex -> Mono.just("Error: " + ex.getMessage()))
-				.doOnSuccess(address -> log.debug(String.format("Added address: %s", address)));
-	}
+    public Flux<HybridAddressSkinny> createSkinnyUnitAddressesFromCsv(List<ValidatedAddress<UnitAddress>> addresses) {
+        return Flux.fromIterable(addresses).limitRate(20)
+                .flatMap(validatedAddress -> hybridAddressSkinnyRepository.saveAll(buildHybridAddressSkinny(validatedAddress.getAddress()))
+                        .onErrorResume(ex -> {
+                            log.warn("Skipping skinny unit address due to error: {}", ex.toString());
+                            return Flux.empty();
+                        }));
+    }
 
-	private Mono<Address> buildAddress(InputAddress inputAddress) {
+    public Flux<HybridAddressFat> createFatUnitAddressesFromCsv(List<ValidatedAddress<UnitAddress>> addresses) {
+        return Flux.fromIterable(addresses).limitRate(20)
+                .flatMap(validatedAddress -> hybridAddressFatRepository.saveAll(buildHybridAddressFat(validatedAddress.getAddress()))
+                        .onErrorResume(ex -> {
+                            log.warn("Skipping fat unit address due to error: {}", ex.toString());
+                            return Flux.empty();
+                        }));
+    }
 
-		log.debug(String.format("Input Address: %s", inputAddress.toString()));
+    public Mono<Address> createAddressFromMsg(InputAddress pubSubAddress) throws CreateAddressException {
 
-		return webClient.get().uri(path, inputAddress.getAddressAll()).retrieve().bodyToMono(TokeniserResponse.class)
-				.map(tokeniserResponse -> {
-					log.debug(String.format("Tokeniser Response: %s", tokeniserResponse.toString()));
-					Address address = AddressMapper.from(inputAddress, tokeniserResponse);
-					return address;
-				});
-	}
-	
-	private Mono<HybridAddressSkinny> buildHybridAddressSkinny(UnitAddress unitAddress) {
+        /*
+         * Can't @Valid the InputAddress for a PubSub msg as it can have legitimate
+         * empty fields e.g. lat/long. Only UPRN is mandatory.
+         */
+        if (pubSubAddress.getUprn().isBlank()) {
+            throw new CreateAddressException("UPRN is mandatory.");
+        }
 
-		log.debug(String.format("Input Address: %s", unitAddress.toString()));
+        return buildAddress(pubSubAddress).flatMap(address -> addressRepository.save(address))
+                .doOnSuccess(address -> log.debug(String.format("Added address: %s", address)));
+    }
 
-		return webClient.get().uri(path, unitAddress.getAddressAll())
-				.retrieve()
-				.onStatus(HttpStatusCode::is4xxClientError, response ->
-					Mono.error(new CreateAddressRuntimeException("Client error")))
-				.onStatus(HttpStatusCode::is5xxServerError, response ->
-					Mono.error(new CreateAddressRuntimeException("Server error")))
-				.bodyToMono(TokeniserResponse.class)
-				.timeout(Duration.ofSeconds(5))
-				.map(tokeniserResponse -> {
-					log.debug(String.format("Tokeniser Response: %s", tokeniserResponse.toString()));
-					HybridAddressSkinny address = HybridAddressSkinnyMapper.from(unitAddress, tokeniserResponse);
-					return address;
-				});
-	}	
+    private Mono<Address> buildAddress(InputAddress inputAddress) {
 
-	private Mono<HybridAddressFat> buildHybridAddressFat(UnitAddress unitAddress) {
+        log.debug(String.format("Input Address: %s", inputAddress.toString()));
 
-		log.debug(String.format("Input Address: %s", unitAddress.toString()));
+        return webClient.get().uri(path, inputAddress.getAddressAll()).retrieve().bodyToMono(TokeniserResponse.class)
+                .map(tokeniserResponse -> {
+                    log.debug(String.format("Tokeniser Response: %s", tokeniserResponse.toString()));
+                    return AddressMapper.from(inputAddress, tokeniserResponse);
+                });
+    }
 
-		return webClient.get().uri(path, unitAddress.getAddressAll())
-				.retrieve()
-				.onStatus(HttpStatusCode::is4xxClientError, response ->
-					Mono.error(new CreateAddressRuntimeException("Client error")))
-				.onStatus(HttpStatusCode::is5xxServerError, response ->
-					Mono.error(new CreateAddressRuntimeException("Server error")))
-				.bodyToMono(TokeniserResponse.class)
-				.timeout(Duration.ofSeconds(5))
-				.map(tokeniserResponse -> {
-					log.debug(String.format("Tokeniser Response: %s", tokeniserResponse.toString()));
-					HybridAddressFat address = HybridAddressFatMapper.from(unitAddress, tokeniserResponse);
-					return address;
-				});
-	}	
-	
-	public <T> String writeBadAddressesCsv(List<ValidatedAddress<T>> badAddresses, String fileName) throws Exception {
+    private Mono<HybridAddressSkinny> buildHybridAddressSkinny(UnitAddress unitAddress) {
 
-		// TODO: Make this asynchronous - it could be a large file!
-		Resource gcsFile = resourceLoader.getResource(
-				String.format("%s%s_%s", gcsBucket, LocalDateTime.now().format((dateTimeFormater)), fileName));
+        log.debug(String.format("Input Address: %s", unitAddress.toString()));
 
-		CSVWriter writer = new CSVWriter(new OutputStreamWriter(((WritableResource) gcsFile).getOutputStream()));
+        return webClient.get().uri(path, unitAddress.getAddressAll())
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response ->
+                        Mono.error(new CreateAddressRuntimeException("Client error")))
+                .onStatus(HttpStatusCode::is5xxServerError, response ->
+                        Mono.error(new CreateAddressRuntimeException("Server error")))
+                .bodyToMono(TokeniserResponse.class)
+                .timeout(Duration.ofSeconds(5))
+                .map(tokeniserResponse -> {
+                    log.debug(String.format("Tokeniser Response: %s", tokeniserResponse.toString()));
+                    return HybridAddressSkinnyMapper.from(unitAddress, tokeniserResponse);
+                });
+    }
 
-		// Write the header
-		writer.writeNext(badAddresses.get(0).getHeader().toArray(new String[0]));
-		badAddresses.forEach(address -> writer.writeNext(address.getRow().toArray(new String[0])));
-		writer.close();
+    private Mono<HybridAddressFat> buildHybridAddressFat(UnitAddress unitAddress) {
 
-		return gcsFile.getFilename();
-	}
+        log.debug(String.format("Input Address: %s", unitAddress.toString()));
+
+        return webClient.get().uri(path, unitAddress.getAddressAll())
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response ->
+                        Mono.error(new CreateAddressRuntimeException("Client error")))
+                .onStatus(HttpStatusCode::is5xxServerError, response ->
+                        Mono.error(new CreateAddressRuntimeException("Server error")))
+                .bodyToMono(TokeniserResponse.class)
+                .timeout(Duration.ofSeconds(5))
+                .map(tokeniserResponse -> {
+                    log.debug(String.format("Tokeniser Response: %s", tokeniserResponse.toString()));
+                    return HybridAddressFatMapper.from(unitAddress, tokeniserResponse);
+                });
+    }
+
+    public <T> String writeBadAddressesCsv(List<ValidatedAddress<T>> badAddresses, String fileName) throws Exception {
+
+        // TODO: Make this asynchronous - it could be a large file!
+        Resource gcsFile = resourceLoader.getResource(
+                String.format("%s%s_%s", gcsBucket, LocalDateTime.now().format((dateTimeFormater)), fileName));
+
+        CSVWriter writer = new CSVWriter(new OutputStreamWriter(((WritableResource) gcsFile).getOutputStream()));
+
+        // Write the header
+        writer.writeNext(badAddresses.getFirst().getHeader().toArray(new String[0]));
+        badAddresses.forEach(address -> writer.writeNext(address.getRow().toArray(new String[0])));
+        writer.close();
+
+        return gcsFile.getFilename();
+    }
 }

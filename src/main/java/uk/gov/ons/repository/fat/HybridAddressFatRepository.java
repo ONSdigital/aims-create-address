@@ -1,5 +1,6 @@
 package uk.gov.ons.repository.fat;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,5 +13,5 @@ public interface HybridAddressFatRepository extends ReactiveCrudRepository<Hybri
 	
 	Flux<HybridAddressFat> findByLpiNagAllContaining(String search);
 	
-	Mono<HybridAddressFat> findById(String id);
+	Mono<HybridAddressFat> findById(@NonNull String id);
 }
