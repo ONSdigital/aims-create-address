@@ -1,5 +1,6 @@
 package uk.gov.ons.repository.fat;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,5 +13,5 @@ public interface AddressRepository extends ReactiveCrudRepository<Address, Strin
 	
 	Flux<Address> findByTokensAddressAllContaining(String search);
 	
-	Mono<Address> findById(String id);
+	Mono<Address> findById(@NonNull String id);
 }

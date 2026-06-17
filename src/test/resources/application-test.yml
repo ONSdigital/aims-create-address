@@ -2,4 +2,9 @@ spring:
   cloud:
     gcp:
       project-id: ${embedded.google.pubsub.project-id}
-      pubsub.emulatorHost: ${embedded.google.pubsub.host}:${embedded.google.pubsub.port}
+      credentials:
+        enabled: false
+      pubsub:
+        emulator-host: ${embedded.google.pubsub.host}:${embedded.google.pubsub.port}
+      storage:
+        enabled: false

@@ -1,7 +1,10 @@
 package uk.gov.ons.exception;
 
+import java.io.Serial;
+
 public class CreateAddressException extends Exception {
-	private static final long serialVersionUID = 1L;
+	@Serial
+    private static final long serialVersionUID = 1L;
 
 	public CreateAddressException() {
 		super();

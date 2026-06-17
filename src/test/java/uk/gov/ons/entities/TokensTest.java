@@ -6,26 +6,22 @@ import org.junit.jupiter.api.Test;
 
 class TokensTest {
 	
-	private String organisationName	= "ACME FLOWERS LTD";
-	private String subBuildingName= "FLAT C";
-	private String buildingName = "CHESTERFIELD LODGE";
-	private String buildingNumber = "78";
-	private String paoStartNumber = "78";
-	private String saoStartSuffix = "C";
-	private String streetName = "BEULAH HILL";
-	private String locality = "LOCKS HEATH";
-	private String townName = "LONDON";
-	private String postcode = "SE19 3EX";
+	private final String organisationName	= "ACME FLOWERS LTD";
+	private final String subBuildingName= "FLAT C";
+	private final String buildingName = "CHESTERFIELD LODGE";
+	private final String buildingNumber = "78";
+	private final String paoStartNumber = "78";
+	private final String saoStartSuffix = "C";
+	private final String streetName = "BEULAH HILL";
+	private final String locality = "LOCKS HEATH";
+	private final String townName = "LONDON";
+	private final String postcode = "SE19 3EX";
 	
-	private String addressLine1 = "ACME FLOWERS LTD";
-	private String addressLine2 = "FLAT C CHESTERFIELD LODGE";
-	private String addressLine3 = "78 BEULAH HILL";
-	
-	private String excpectedAddressAll1 = "ACME FLOWERS LTD FLAT C CHESTERFIELD LODGE 78 BEULAH HILL LOCKS HEATH LONDON SE19 3EX";
-	private String excpectedAddressAll2 = "ACME FLOWERS LTD FLAT C CHESTERFIELD LODGE 78 BEULAH HILL LOCKS HEATH SE19 3EX";
-	private String excpectedAddressAll3 = "ACME FLOWERS LTD FLAT C CHESTERFIELD LODGE 78 BEULAH HILL LONDON SE19 3EX";
-	
-	@Test
+	private final String addressLine1 = "ACME FLOWERS LTD";
+	private final String addressLine2 = "FLAT C CHESTERFIELD LODGE";
+	private final String addressLine3 = "78 BEULAH HILL";
+
+    @Test
 	void testAddressAllTownOnly() {
 		
 		Tokens tokens = new Tokens.TokensBuilder()
@@ -42,8 +38,9 @@ class TokensTest {
 				.addressLine2(addressLine2)
 				.addressLine3(addressLine3)
 				.build();
-		
-		assertEquals(excpectedAddressAll3, tokens.getAddressAll());
+
+        String excpectedAddressAll3 = "ACME FLOWERS LTD FLAT C CHESTERFIELD LODGE 78 BEULAH HILL LONDON SE19 3EX";
+        assertEquals(excpectedAddressAll3, tokens.getAddressAll());
 	}
 	
 	@Test
@@ -63,8 +60,9 @@ class TokensTest {
 				.addressLine2(addressLine2)
 				.addressLine3(addressLine3)
 				.build();
-		
-		assertEquals(excpectedAddressAll2, tokens.getAddressAll());
+
+        String excpectedAddressAll2 = "ACME FLOWERS LTD FLAT C CHESTERFIELD LODGE 78 BEULAH HILL LOCKS HEATH SE19 3EX";
+        assertEquals(excpectedAddressAll2, tokens.getAddressAll());
 	}
 	
 	@Test
@@ -85,8 +83,9 @@ class TokensTest {
 				.addressLine2(addressLine2)
 				.addressLine3(addressLine3)
 				.build();
-		
-		assertEquals(excpectedAddressAll1, tokens.getAddressAll());
+
+        String excpectedAddressAll1 = "ACME FLOWERS LTD FLAT C CHESTERFIELD LODGE 78 BEULAH HILL LOCKS HEATH LONDON SE19 3EX";
+        assertEquals(excpectedAddressAll1, tokens.getAddressAll());
 	}
 
 }

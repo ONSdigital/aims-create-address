@@ -33,6 +33,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -90,9 +92,10 @@ class AddressServiceTest {
 	@Autowired
 	private HybridAddressSkinnyRepository skinnyRepository;
 	
-    public static final DockerImageName ELASTIC_IMAGE = DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:7.9.3");
-	private final ElasticsearchContainer elastic = new ElasticsearchContainer(ELASTIC_IMAGE);
-
+    public static final DockerImageName ELASTIC_IMAGE = DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.14.3");
+	private static final ElasticsearchContainer elastic = new ElasticsearchContainer(ELASTIC_IMAGE)
+			.withEnv("xpack.security.enabled", "false")
+			.withEnv("discovery.type", "single-node");
 	private static MockWebServer mockBackEnd;
 
 	@Autowired
@@ -286,29 +289,76 @@ class AddressServiceTest {
 	private HybridAddressFat hybridAddressFat2;
 	private HybridAddressSkinny hybridAddressSkinny1;
 	private HybridAddressSkinny hybridAddressSkinny2;
-	
-	public AddressServiceTest() throws IOException {
 
-		elastic.start();
+	@DynamicPropertySource
+	static void elasticProps(DynamicPropertyRegistry registry) {
+		if (!elastic.isRunning()) {
+			elastic.start();
+		}
+		if (mockBackEnd == null) {
+			try {
+				mockBackEnd = new MockWebServer();
+				mockBackEnd.start();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 
-		System.setProperty("spring.elasticsearch.rest.uris",
-				elastic.getContainerIpAddress() + ":" + elastic.getFirstMappedPort());
-		System.setProperty("spring.data.elasticsearch.client.reactive.endpoints",
-				elastic.getContainerIpAddress() + ":" + elastic.getFirstMappedPort());
+		mockBackEnd.setDispatcher(new Dispatcher() {
+			@Override
+			public MockResponse dispatch(RecordedRequest request) {
+				String path = request.getPath() == null ? "" : request.getPath();
 
-		mockBackEnd = new MockWebServer();
-		mockBackEnd.start();
+				// Safe fallback for tokeniser calls made during startup or tests
+				if (path.startsWith("/tokens")) {
+					String body = """
+						{
+						  "organisationName": "",
+						  "departmentName": "",
+						  "subBuildingName": "",
+						  "buildingName": "",
+						  "buildingNumber": "",
+						  "paoStartNumber": "",
+						  "paoStartSuffix": "",
+						  "paoEndNumber": "",
+						  "paoEndSuffix": "",
+						  "saoStartNumber": "",
+						  "saoStartSuffix": "",
+						  "saoEndNumber": "",
+						  "saoEndSuffix": "",
+						  "streetName": "DEFAULT STREET",
+						  "locality": "",
+						  "townName": "LONDON",
+						  "postcode": "SE1 1AA",
+						  "postcodeIn": "1AA",
+						  "postcodeOut": "SE1"
+						}
+						""";
+					return new MockResponse()
+							.setResponseCode(200)
+							.addHeader("Content-Type", "application/json")
+							.setBody(body);
+				}
 
-		System.setProperty("aims.tokeniser.uri", String.format("http://localhost:%s", mockBackEnd.getPort()));
+				return new MockResponse()
+						.setResponseCode(404)
+						.addHeader("Content-Type", "application/json")
+						.setBody("{}");
+			}
+		});
+
+		registry.add("spring.elasticsearch.rest.uris", () -> elastic.getHost() + ":" + elastic.getFirstMappedPort());
+		registry.add("spring.data.elasticsearch.client.reactive.endpoints", () -> elastic.getHost() + ":" + elastic.getFirstMappedPort());
+		registry.add("aims.tokeniser.uri",
+				() -> "http://localhost:" + mockBackEnd.getPort());
 	}
 
 	@BeforeAll
 	public void beforeAll() throws Exception {
-		
+
 		/*
 		 * This test data is used for the skinny and fat unit-address tests
 		 */
-
 		Reader reader = new BufferedReader(new FileReader(new File("src/test/resources/unit-addresses-test.csv")));
 
 		CsvToBean<UnitAddress> csvToBean = new CsvToBeanBuilder<UnitAddress>(reader).withType(UnitAddress.class)

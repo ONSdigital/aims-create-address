@@ -40,7 +40,7 @@ public @Data class AuxAddress extends CSVAddress {
 
 	@Override
 	public List<String> getRow() {
-		List<String> contents = new ArrayList<String>(super.getRow());
+		List<String> contents = new ArrayList<>(super.getRow());
 		contents.addAll(List.of( this.htcWillingness, this.htcDigital, this.treatmentCode, this.fieldCoordinatorId,
 			this.fieldOfficerId, this.ceExpectedCapacity, this.ceSecure, this.printBatch ));
 		return contents;
@@ -48,7 +48,7 @@ public @Data class AuxAddress extends CSVAddress {
 
 	@Override
 	public List<String> getHeader() {
-		List<String> header = new ArrayList<String>(super.getHeader());
+		List<String> header = new ArrayList<>(super.getHeader());
 		header.addAll(List.of("HTC_WILLINGNESS", "HTC_DIGITAL", "TREATMENT_CODE",
 				"FIELDCOORDINATOR_ID", "FIELDOFFICER_ID", "CE_EXPECTED_CAPACITY", "CE_SECURE", "PRINT_BATCH"));
 		return header;
